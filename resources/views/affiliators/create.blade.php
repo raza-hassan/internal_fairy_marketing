@@ -120,68 +120,6 @@
                                    </label>
                                    <input class="form-control requiredfile address" type="text" placeholder="Enter Address" name="address" value="{{ old('address') }}"  required=""/>
                                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="row">
-    <!-- City -->
-    <div class="col-md-6">
-        <div class="form-group">
-            <label for="city">City</label>
-            <input
-                type="text"
-                name="city"
-                id="city"
-                class="form-control"
-                placeholder="Enter City"
-                value="{{ old('city', $model->city ?? '') }}"
-            >
-        </div>
-    </div>
-
-    <!-- Zone -->
-    <div class="col-md-6">
-        <div class="form-group">
-            <label for="zone">Zone</label>
-            <select name="zone" id="zone" class="form-control">
-                <option value="">Select Zone</option>
-                <option value="Zone 1" {{ old('zone', $model->zone ?? '') == 'Zone 1' ? 'selected' : '' }}>Zone 1</option>
-                <option value="Zone 2" {{ old('zone', $model->zone ?? '') == 'Zone 2' ? 'selected' : '' }}>Zone 2</option>
-                <option value="Zone 3" {{ old('zone', $model->zone ?? '') == 'Zone 3' ? 'selected' : '' }}>Zone 3</option>
-                <option value="Zone 4" {{ old('zone', $model->zone ?? '') == 'Zone 4' ? 'selected' : '' }}>Zone 4</option>
-                <option value="Zone 5" {{ old('zone', $model->zone ?? '') == 'Zone 5' ? 'selected' : '' }}>Zone 5</option>
-            </select>
-        </div>
-    </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                                <!-- {{-- <div class="form-group">
                                    <label style="width: 100%;">Mobile<sup>*</sup>
                                    </label>
