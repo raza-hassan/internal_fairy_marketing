@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LocationController;
 /*
   |--------------------------------------------------------------------------
   | Web Routes
@@ -395,6 +396,11 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function() {
             Route::delete('/affiliator/delete/permanently/{affiliator}', [App\Http\Controllers\AffiliatorsController::class, 'affiliator_delete_permanently']);
             Route::get('trash-affiliator-search', [App\Http\Controllers\AffiliatorsController::class, 'trash_search']);
 
+            Route::get('/locations',                 [LocationController::class, 'index'])->name('locations.index');
+            Route::get('/locations/data',            [LocationController::class, 'data'])->name('locations.data');
+            Route::get('/locations/{location}/children', [LocationController::class, 'children'])->name('locations.children');
+            Route::post('/locations',                [LocationController::class, 'store'])->name('locations.store');
+            Route::delete('/locations/{location}',   [LocationController::class, 'destroy'])->name('locations.destroy');
 
             // Route::get('view/leads', [App\Http\Controllers\LeadsController::class, 'view_lead']);
 

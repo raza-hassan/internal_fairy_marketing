@@ -522,7 +522,7 @@
         <!-- Specific Page Vendor -->
         <script src="{{ asset('assets/vendor/summernote/summernote.js')}}"></script>
         <script src="https://kit.fontawesome.com/4cfbdf6d01.js" crossorigin="anonymous"></script>
-        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        {{-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script> --}}
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
         <script src="{{ asset('public/js/lead.js')}}"></script>
         <script>
