@@ -254,7 +254,22 @@
                         </div>
 
 
-
+                        @if(count($locations) > 0)
+                            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
+                                <div class="form-group">
+                                    <label>Location</label>
+                                    <select class="form-control locations_select2" name="location_id[]" multiple>
+                                        <option value="">All Locations</option>
+                                        @foreach($locations as $location)
+                                            <option value="{{ $location->id }}"
+                                                {{ in_array($location->id, request()->input('location_id', [])) ? 'selected' : '' }}>
+                                                {{ $location->full_path }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        @endif
 
 
                         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">

@@ -1,15 +1,14 @@
 <?php
 namespace App\Models;
-use Illuminate\Database\Eloquent\Factories\HasFactory;       // =========================
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Auth\User as Authenticatable;      // =========================
-use Illuminate\Notifications\Notifiable;                     // =========================
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Affiliator extends Model //Authenticatable                     // =========================
+class Affiliator extends Model
 {
 
-    use HasFactory, Notifiable;                              // =========================
-    // protected $guard = 'affiliator';                         // =========================
+    use HasFactory, Notifiable;
 
     protected $table = 'affiliators';
     protected $primaryKey = 'id';
@@ -18,8 +17,6 @@ class Affiliator extends Model //Authenticatable                     // ========
         'email',
         'business',
         'phone',
-        // 'password',                                         // =========================
-        // 'is_login',                                         //=====================
         'telephone',
         'telephone1',
         'gender',
@@ -33,7 +30,9 @@ class Affiliator extends Model //Authenticatable                     // ========
         'offboardpic',
         'offvisitpic',
         'type',
-        'status'
+        'status',
+        'location_id',
+
     ];
     public function assigned() {
         return $this->belongsTo(\App\Models\User::class, 'user_id','id');

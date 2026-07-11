@@ -526,6 +526,12 @@
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
         <script src="{{ asset('public/js/lead.js')}}"></script>
         <script>
+
+            $('.locations_select2').select2({
+                width: '100%',
+                placeholder: 'Select Location',
+                allowClear: true
+            });
         // $(document).on('click', '.fairy_notification', function ()
         // {
         //     alert('check1');

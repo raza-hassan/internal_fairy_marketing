@@ -120,6 +120,26 @@
                                    </label>
                                    <input class="form-control requiredfile address" type="text" placeholder="Enter Address" name="address" value="{{ old('address') }}"  required=""/>
                                </div>
+
+                               <div class="form-group">
+                                    <label for="location_id">
+                                        Location <sup>*</sup>
+                                    </label>
+                                    <select name="location_id" id="location_id" class="form-control ps-select locations_select2" required>
+                                        <option value="">Select Location</option>
+                                        @foreach ($locations as $location)
+                                        <option value="{{ $location->id }}" {{ old('location_id')==$location->id ?
+                                            'selected' : '' }}>
+                                            {{ $location->full_path }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        Select the affiliator's location.
+                                    </small>
+                                </div>
+
+
                                <!-- {{-- <div class="form-group">
                                    <label style="width: 100%;">Mobile<sup>*</sup>
                                    </label>

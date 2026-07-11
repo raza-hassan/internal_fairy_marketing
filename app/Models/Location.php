@@ -46,4 +46,10 @@ class Location extends Model
 
         return $ids;
     }
+
+    public function affiliators()
+    {
+        return $this->hasMany(Affiliator::class, 'location_id');
+    }
+
 }

@@ -16,6 +16,7 @@ use Mail;
 use App\Http\Helpers\Helper;
 use App\Models\Number;
 use Carbon\Carbon;
+use App\Models\Location;
 
 class AffiliatorsController extends Controller {
 
@@ -34,7 +35,10 @@ class AffiliatorsController extends Controller {
                 $responce = Helper::users($data);
                 $users = $responce['users']->where('office_id' , 1);
             // ====== Users With Helper======
-            return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users'));
+
+        $locations = Location::whereHas('affiliators')->get();
+
+            return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users', 'locations'));
         }else{
             return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }
@@ -53,7 +57,9 @@ class AffiliatorsController extends Controller {
             $users = $responce['users'];
         // ====== Users With Helper======
 
-        return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users'));
+        $locations = Location::whereHas('affiliators')->get();
+
+        return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users', 'locations'));
     }
 
     public function dealors() {
@@ -70,7 +76,9 @@ class AffiliatorsController extends Controller {
             $users = $responce['users']->where('office_id', 1);
         // ====== Users With Helper======
 
-        return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users'));
+        $locations = Location::whereHas('affiliators')->get();
+
+        return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users', 'locations'));
     }
 
     public function freeliencer()
@@ -88,7 +96,9 @@ class AffiliatorsController extends Controller {
             $users = $responce['users']->where('office_id', 1);
         // ====== Users With Helper======
 
-        return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users'));
+        $locations = Location::whereHas('affiliators')->get();
+
+        return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users' , 'locations'));
     }
 
     public function affilitor_leads(Affiliator $affiliator)
@@ -119,7 +129,8 @@ class AffiliatorsController extends Controller {
     public function create()
     {
         if(Auth::user()->can('affiliator.create')){
-            return view('affiliators.create');
+            $locations = Location::with('parent.parent.parent.parent')->orderBy('name')->get();
+            return view('affiliators.create', compact('locations'));
         }else{
             return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }
@@ -213,6 +224,7 @@ class AffiliatorsController extends Controller {
                         'offinspic' => 'required',
                         'offoutspic' => 'required',
                         'offboardpic' => 'required',
+                        'location_id' => ['nullable', 'exists:locations,id'],
                     ]);
                 } else {
                     $validated = $request->validate([
@@ -224,6 +236,7 @@ class AffiliatorsController extends Controller {
                         'address' => 'required',
                         'cnicf' => 'required',
                         'cnicb' => 'required',
+                        'location_id' => ['nullable', 'exists:locations,id'],
                     ]);
                 }
 
@@ -279,6 +292,7 @@ class AffiliatorsController extends Controller {
                             'offoutspic' => $offoutspic,
                             'offboardpic' => $offboardpic,
                             'offvisitpic' => $offvisitpic,
+                            'location_id' => $request->location_id,
                             // 'password' => Hash::make($request->password),
                             // 'is_login' => $login,
                                 ], [
@@ -427,7 +441,8 @@ class AffiliatorsController extends Controller {
             $phone=Number::Where('type' , 'affiliators')->Where('client_id' , $affiliator->id)
                         ->where('number' , 'Like' , '%'.$affiliator->phone.'%')->first();
 
-            return view('affiliators.edit', compact('affiliator', 'managers' , 'numbers' , 'phone'));
+            $locations = Location::with('parent.parent.parent.parent')->orderBy('name')->get();
+            return view('affiliators.edit', compact('affiliator', 'managers' , 'numbers' , 'phone' ,'locations'));
         }else{
             return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }
@@ -559,12 +574,13 @@ class AffiliatorsController extends Controller {
                 }
             //======= edit international number check end
 
-                        $validated = $request->validate([
+            $validated = $request->validate([
                 'phone'      => 'required_without:ptclphone|unique:affiliators,phone,' . $affiliator->id,
                 'ptclphone'  => 'required_without:phone|unique:affiliators,phone,' . $affiliator->id,
                 'name'       => 'required',
                 'business'   => 'required',
                 'address'    => 'required',
+                'location_id' => ['nullable', 'exists:locations,id'],
             ]);
 
             // Determine which phone to use
@@ -731,6 +747,7 @@ class AffiliatorsController extends Controller {
                 $affiliator->telephone = $telephone;
                 $affiliator->telephone1 = $telephone1;
                 $affiliator->note = $note;
+                $affiliator->location_id = $request->location_id;
                 // $affiliator->phone = $phone;
                 $affiliator->save();
 
@@ -1604,9 +1621,106 @@ class AffiliatorsController extends Controller {
         }
     }
 
+    // public function search(Request $request)
+    // {
+    //     // echo '<pre>';print_r($request->input());exit;
+    //     if(Auth::user()->can('affiliator.view'))
+    //     {
+    //         $condition = array();
+    //         $condition[] = array('is_delete', '=', 0);
+
+    //         if ($request->input('name') != '') {
+    //             $condition[] = array('name', 'Like', '%' . $request->input('name') . '%');
+    //         }
+
+    //         if ($request->input('type') > 0) {
+    //             $condition[] = array('type', $request->input('type'));
+    //         }
+    //         if ($request->input('status') != '') {
+    //             $condition[] = array('status', $request->input('status'));
+    //         }
+
+    //         if ($request->input('email') != '') {
+    //             $condition[] = array('email', '=', '%' . $request->input('email') . '%');
+    //         }
+
+    //         if ($request->input('phone') != '')
+    //         {
+    //             $first_nbr=mb_substr($request->phone, 0 , 1);
+
+    //             if($first_nbr == 0){
+    //                 $phone = substr($request->phone, 1);
+    //             }else{
+    //                 $phone = $request->phone;
+    //             }
+
+    //             // $condition[] = array('phone', 'Like', '%' . $phone . '%');
+    //             $affiliator_numbers =Number::where('type', 'affiliators')->where('number', 'Like', '%' . $phone . '%')->pluck('client_id');
+    //         }
+
+    //         if ($request->input('user_id') > 0) {
+    //             $condition[] = array('user_id', $request->input('user_id'));
+    //         }
+
+    //         // echo '<pre>';print_r($condition);exit;
+
+    //         // Search in the title and body columns from the posts table
+    //         $affiliators = array();
+    //         if (!empty($condition)) {
+
+    //             // if ($request->input('phone') !=''){
+    //             //     $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->orderBy('id', 'desc')->paginate(30);
+    //             // }else{
+    //             //     $affiliators = Affiliator::where($condition)->orderBy('id', 'desc')->paginate(30);
+    //             // }
+
+    //             if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14){
+    //                 if ($request->input('phone') !=''){
+    //                     $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->orderBy('id', 'desc')->paginate(30);
+    //                 }else{
+    //                     $affiliators = Affiliator::where($condition)->orderBy('id', 'desc')->paginate(30);
+    //                 }
+    //             }else{
+    //                 $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
+    //                 if ($request->input('phone') !=''){
+    //                     $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate(30);
+    //                 }else{
+    //                     $affiliators = Affiliator::where($condition)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate(30);
+    //                 }
+    //             }
+
+    //         } else {
+    //             if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+    //                 $affiliators = Affiliator::orderBy('id', 'desc')->paginate(30);
+    //             } else {
+    //                 $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
+    //                 $affiliators = Affiliator::whereIn('user_id', $users)->orWhere('user_id', Auth::user()->id)->orderBy('id', 'desc')->paginate(30);
+    //             }
+    //         }
+
+    //         // echo '<pre>';print_r($records);exit;
+
+    //         $search_person = $request->input('search_person');
+    //         $id = $request->input('current_user');
+
+    //         // ====== Users With Helper======
+    //             $data = array(
+    //                 'id' => Auth::user()->id,
+    //                 'role' => Auth::user()->role,
+    //             );
+    //             $responce = Helper::users($data);
+    //             $users = $responce['users']->where('office_id', 1);
+    //         // ====== Users With Helper======
+
+    //         return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users'));
+    //     }else{
+    //         return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
+    //     }
+    // }
+
+
     public function search(Request $request)
     {
-        // echo '<pre>';print_r($request->input());exit;
         if(Auth::user()->can('affiliator.view'))
         {
             $condition = array();
@@ -1637,7 +1751,6 @@ class AffiliatorsController extends Controller {
                     $phone = $request->phone;
                 }
 
-                // $condition[] = array('phone', 'Like', '%' . $phone . '%');
                 $affiliator_numbers =Number::where('type', 'affiliators')->where('number', 'Like', '%' . $phone . '%')->pluck('client_id');
             }
 
@@ -1645,31 +1758,44 @@ class AffiliatorsController extends Controller {
                 $condition[] = array('user_id', $request->input('user_id'));
             }
 
-            // echo '<pre>';print_r($condition);exit;
-
-            // Search in the title and body columns from the posts table
             $affiliators = array();
             if (!empty($condition)) {
 
-                // if ($request->input('phone') !=''){
-                //     $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->orderBy('id', 'desc')->paginate(30);
-                // }else{
-                //     $affiliators = Affiliator::where($condition)->orderBy('id', 'desc')->paginate(30);
-                // }
+                if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
 
-                if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14){
-                    if ($request->input('phone') !=''){
-                        $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->orderBy('id', 'desc')->paginate(30);
-                    }else{
-                        $affiliators = Affiliator::where($condition)->orderBy('id', 'desc')->paginate(30);
+                    $query = Affiliator::where($condition);
+
+                    if ($request->input('phone') != '') {
+                        $query->whereIn('id', $affiliator_numbers);
                     }
-                }else{
-                    $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-                    if ($request->input('phone') !=''){
-                        $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate(30);
-                    }else{
-                        $affiliators = Affiliator::where($condition)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate(30);
+
+                    $locationIds = array_filter($request->input('location_id', []));
+
+                    if (!empty($locationIds)) {
+                        $query->whereIn('location_id', $locationIds);
                     }
+
+                    $affiliators = $query->orderBy('id', 'desc')->paginate(30);
+
+                } else {
+
+                    $users = User::where('id', Auth::user()->id)
+                        ->orWhere('parent', Auth::user()->id)
+                        ->pluck('id');
+
+                    $query = Affiliator::where($condition)
+                        ->whereIn('user_id', $users);
+
+                    if ($request->input('phone') != '') {
+                        $query->whereIn('id', $affiliator_numbers);
+                    }
+
+                    if (!empty($locationIds)) {
+                        $query->whereIn('location_id', $locationIds);
+                    }
+
+                    $affiliators = $query->orderBy('id', 'desc')->paginate(30);
+
                 }
 
             } else {
@@ -1680,8 +1806,6 @@ class AffiliatorsController extends Controller {
                     $affiliators = Affiliator::whereIn('user_id', $users)->orWhere('user_id', Auth::user()->id)->orderBy('id', 'desc')->paginate(30);
                 }
             }
-
-            // echo '<pre>';print_r($records);exit;
 
             $search_person = $request->input('search_person');
             $id = $request->input('current_user');
@@ -1695,7 +1819,9 @@ class AffiliatorsController extends Controller {
                 $users = $responce['users']->where('office_id', 1);
             // ====== Users With Helper======
 
-            return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users'));
+            $locations = Location::whereHas('affiliators')->get();
+
+            return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users','locations'));
         }else{
             return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }
