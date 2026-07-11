@@ -1,0 +1,1 @@
+New Leads came from facebook ({{$counter}}) at {{date('d, F H:i')}}
