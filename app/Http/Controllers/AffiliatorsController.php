@@ -1759,6 +1759,9 @@ class AffiliatorsController extends Controller {
             }
 
             $affiliators = array();
+
+            $locationIds = array_filter($request->input('location_id', []));
+
             if (!empty($condition)) {
 
                 if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
@@ -1769,10 +1772,13 @@ class AffiliatorsController extends Controller {
                         $query->whereIn('id', $affiliator_numbers);
                     }
 
-                    $locationIds = array_filter($request->input('location_id', []));
-
                     if (!empty($locationIds)) {
-                        $query->whereIn('location_id', $locationIds);
+                        $allLocationIds = [];
+                        $locations = Location::with('children')->whereIn('id', $locationIds)->get();
+                        foreach ($locations as $location) {
+                            $allLocationIds = array_merge($allLocationIds, $location->descendantIds());
+                        }
+                        $query->whereIn('location_id', array_unique($allLocationIds));
                     }
 
                     $affiliators = $query->orderBy('id', 'desc')->paginate(30);
@@ -1791,7 +1797,12 @@ class AffiliatorsController extends Controller {
                     }
 
                     if (!empty($locationIds)) {
-                        $query->whereIn('location_id', $locationIds);
+                        $allLocationIds = [];
+                        $locations = Location::with('children')->whereIn('id', $locationIds)->get();
+                        foreach ($locations as $location) {
+                            $allLocationIds = array_merge($allLocationIds, $location->descendantIds());
+                        }
+                        $query->whereIn('location_id', array_unique($allLocationIds));
                     }
 
                     $affiliators = $query->orderBy('id', 'desc')->paginate(30);
