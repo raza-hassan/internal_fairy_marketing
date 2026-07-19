@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use App\Models\Facebook;
 use App\Enums\LeadFeedBackStatus;
+use Illuminate\Support\Facades\Log;
 
 class FacebookConversionService
 {
@@ -42,7 +43,7 @@ class FacebookConversionService
         ];
 
         // Purchase event requires value and currency
-        if ($eventName == LeadFeedBackStatus::SALE_CLOSED->facebookEvent() ) {
+        if ($eventName == LeadFeedBackStatus::SALE_CLOSED->facebookEvent()) {
 
             if (!$feedback || $feedback->amount == null) {
                 throw new \Exception('Amount is required for Purchase event');
@@ -52,13 +53,18 @@ class FacebookConversionService
             $customData['value'] = (float) ($feedback->amount ?? 0);
         }
 
+        // Log::info('Sending Facebook Event', [
+        //     'event_name' => $eventName,
+        //     'event_id' => 'feedback_' . $feedback->id . '_' . time(),
+        //     'lead_id' => $lead->id,
+        // ]);
 
         $payload = [
             'data' => [
                 [
                     'event_name' => $eventName,
                     'event_time' => time(),
-                    'event_id' => 'feedback_' . $feedback->id,
+                    'event_id' => 'feedback_' . $feedback->id . '_' . time(),
 
                     'action_source' => 'system_generated',
                     // 'action_source' => 'website',
