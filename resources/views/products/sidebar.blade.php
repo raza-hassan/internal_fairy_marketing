@@ -16,6 +16,7 @@
 
                     @if(Auth::user()->can('inventory.prices.update'))
                         <li><a href="{{url('priceupdate')}}"><i class="fa fa-arrow-up" aria-hidden="true"></i><span>Inventory Prices Update</span></a></li>
+                        <li><a href="{{route('import.products')}}"><i class="fa fa-arrow-up" aria-hidden="true"></i><span>Inventory Import Update</span></a></li>
                     @endif
 
                     @if(Auth::user()->can('discount.prices.view'))

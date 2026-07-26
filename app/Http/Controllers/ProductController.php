@@ -14,6 +14,7 @@ use App\Models\LeadNotes;
 use App\Models\Order;
 use App\Models\ProductNotes;
 use App\Models\User;
+use App\Services\ProductImportService;
 
 class ProductController extends Controller
 {
@@ -954,4 +955,73 @@ class ProductController extends Controller
     }
 
 
+    public function importProducts()
+    {
+        return view('products.import');
+    }
+
+    public function importProductStore(Request $request, ProductImportService $service)
+    {
+        $request->validate([
+            'import_file'                   => 'required|file|mimes:csv,txt,xls,xlsx|max:10240',
+            'value_source'                  => 'required|in:calculate,file',
+            'down_payment_percent'          => 'nullable|numeric|min:0|max:100',
+            'possession_percent'            => 'nullable|numeric|min:0|max:100',
+            'quarterly_installments_count'  => 'nullable|integer|min:1',
+            'corner_amount'                 => 'nullable|numeric|min:0',
+            'corner_percent'                => 'nullable|numeric|min:0|max:100',
+        ]);
+
+        if ($request->filled('corner_amount') && $request->filled('corner_percent')) {
+            return back()
+                ->withErrors(['corner_amount' => 'Only one field is required. Enter either the Corner Amount or the Corner Percentage.'])
+                ->withInput();
+        }
+
+        // Percent fields form pe "25" ki tarah aate hain — decimal (0.25) me convert kar rahe hain
+        $downPercent = $request->filled('down_payment_percent')
+            ? ((float) $request->down_payment_percent) / 100
+            : null;
+
+        $possessionPercent = $request->filled('possession_percent')
+            ? ((float) $request->possession_percent) / 100
+            : null;
+
+        if ($downPercent !== null && $possessionPercent !== null && ($downPercent + $possessionPercent) >= 1) {
+            return back()
+                ->withErrors(['down_payment_percent' => 'The combined total of Down Payment % and Possession % must be less than 100%.'])
+                ->withInput();
+        }
+
+        $overrides = [
+            'down_payment_percent'         => $downPercent,
+            'possession_percent'           => $possessionPercent,
+            'quarterly_installments_count' => $request->filled('quarterly_installments_count')
+                ? (int) $request->quarterly_installments_count
+                : null,
+            'monthly_installments_count' => $request->filled('monthly_installments_count')
+                ? (int) $request->monthly_installments_count
+                : null,
+            'corner_amount' => $request->filled('corner_amount')
+                ? (float) $request->corner_amount
+                : null,
+            'corner_percent' => $request->filled('corner_percent')
+                ? ((float) $request->corner_percent) / 100
+                : null,
+        ];
+
+        $result = $service->import(
+            $request->file('import_file'),
+            $request->input('value_source', 'calculate'),
+            $overrides
+        );
+
+        return view('products.import_result', [
+            'summary'     => $result['summary'],
+            'products'    => $result['updated_products'],
+            'resolved'    => $result['resolved_settings'],
+            'valueSource' => $result['value_source'],
+        ]);
+    }
+    
 }
