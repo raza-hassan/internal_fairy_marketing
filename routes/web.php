@@ -227,6 +227,9 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function() {
         Route::get('inventory-search', [App\Http\Controllers\ProductController::class, 'search']);
         Route::get('get-unit-ids/{unitids}', [App\Http\Controllers\ProductController::class, 'getUnitIds']);
         Route::get('priceupdate', [App\Http\Controllers\ProductController::class, 'show']);
+        Route::get('products/import', [App\Http\Controllers\ProductController::class, 'importProducts'])->name('import.products');
+        Route::post('products/import', [App\Http\Controllers\ProductController::class, 'importProducttore'])->name('products.import.store');
+
         Route::get('inventory-update', [App\Http\Controllers\ProductController::class, 'updateprice']);
         Route::post('/existence/store', [App\Http\Controllers\ProductController::class, 'existence']);
         Route::post('inventory/approve/store', [App\Http\Controllers\ProductController::class, 'approval_store']);
