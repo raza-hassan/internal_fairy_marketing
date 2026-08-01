@@ -17,6 +17,7 @@ use App\Http\Helpers\Helper;
 use App\Models\Number;
 use Carbon\Carbon;
 use App\Models\Location;
+use App\Models\TransferAffiliator;
 
 class AffiliatorsController extends Controller {
 
@@ -36,7 +37,7 @@ class AffiliatorsController extends Controller {
                 $users = $responce['users']->where('office_id' , 1);
             // ====== Users With Helper======
 
-        $locations = Location::whereHas('affiliators')->get();
+            $locations = Location::whereHas('affiliators')->get();
 
             return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users', 'locations'));
         }else{
@@ -1834,6 +1835,61 @@ class AffiliatorsController extends Controller {
 
             return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users','locations'));
         }else{
+            return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
+        }
+    }
+
+
+    public function transferAffiliatorStore(Request $request)
+    {
+        if (Auth::user()->can('affiliator.transfer') || Auth::user()->can('trashed.affiliator.transfer')) {
+
+            if($request->from_user_id == $request->to_user_id){
+                return back()->withInput()->withErrors(__('Affiliator alreayd shared with this user.'));
+            }
+
+            TransferAffiliator::firstOrCreate(
+                [
+                    'affiliator_id' => $request->affiliator_id,
+                    'from_user_id' => $request->from_user_id,
+                    'to_user_id' => $request->to_user_id,
+                    'transferred_by' => $request->transferred_by,
+                    'status' => 1,
+                    'note' => $request->note,
+                ]
+            );
+
+            Affiliator::where('id', $request->affiliator_id)->update([
+                'user_id' => $request->to_user_id,
+            ]);
+
+            // ===============Notification===============
+            $user = User::where('id', $request->to_user_id)->first();
+            $from = User::where('id', $request->from_user_id)->first();
+            $transfer_by = User::where('id', $request->transferred_by)->first();
+
+            $data = array(
+                'type' => 'Affiliator Transfer',
+                'msg_body' => 'Affiliator Has Transfered From ' . $from->name . ' To ' . $user->name . ' By ' . $transfer_by->name . '. Affiliator ID: ' . $request->affiliator_id,
+                'created_by' => $transfer_by->id,
+                'show_to' => $user->id,
+                'show_to_role' => 0,
+                'redirect' => 'affiliators',
+            );
+            Helper::notification($data);
+            $data = array(
+                'type' => 'Affiliator Transfer',
+                'msg_body' => 'Affiliator Has Transfered From ' . $from->name . ' To ' . $user->name . ' By ' . $transfer_by->name . '. Affiliator ID: ' . $request->affiliator_id,
+                'created_by' => $transfer_by->id,
+                'show_to' => $from->id,
+                'show_to_role' => 0,
+                'redirect' => 'affiliators',
+            );
+            Helper::notification($data);
+            // ==========================================
+
+            return back()->withInput()->withStatus(__('Affiliator Tranfered Successfully.'));
+        } else {
             return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }
     }

@@ -277,7 +277,7 @@
                                                                                     {{html_entity_decode($notification->msg_body)}}
                                                                                     {{htmlspecialchars($notification->msg_body)}}
                                                                                 --}}
-                                                                                @if($notification->redirect == 'leads' || $notification->redirect=='newleads')
+                                                                                @if($notification->redirect == 'leads' || $notification->redirect=='newleads' || $notification->redirect == 'affiliators')
                                                                                 {{$notification->msg_body}}
                                                                                 @else
                                                                                 <?php echo base64_decode($notification->msg_body); ?>

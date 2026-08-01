@@ -27,9 +27,8 @@
                         </div>
                         <div class="card__title">
                                 <p class="card__title" style="margin-left: 5%; margin-top: 5px;">
-
-                                    @if($notification->redirect == 'leads' || $notification->redirect=='newleads')
-                                        {{$notification->msg_body}}
+                                    @if($notification->redirect == 'leads' || $notification->redirect=='newleads' || $notification->redirect == 'affiliators')
+                                       {{$notification->msg_body}}
                                     @else
                                         <?php echo base64_decode($notification->msg_body); ?>
                                     @endif
