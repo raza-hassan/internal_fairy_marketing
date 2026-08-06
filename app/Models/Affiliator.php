@@ -4,7 +4,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use App\Models\TransferAffiliator;
 class Affiliator extends Model
 {
 
@@ -45,7 +45,7 @@ class Affiliator extends Model
         return $this->hasOne(Leads::class, 'afflilate_id','id')->latest();
     }
     public function lastlead() {
-        return $this->hasOne(Leads::class, 'afflilate_id')->latest();
+        return $this->hasOne(Leads::class, 'afflilate_id')->latest(); 
     }
     public function taskStatus() {
         return $this->hasOne(AffiliatorTask::class, 'affliator_id')->latest();
@@ -56,5 +56,10 @@ class Affiliator extends Model
     public function leadtrash()
     {
         return $this->hasMany(Leads::class, 'afflilate_id'); // Ensure this matches your foreign key
+    }
+
+    public function transferHistories()
+    {
+        return $this->hasMany(TransferAffiliator::class);
     }
 }

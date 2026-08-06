@@ -3,14 +3,14 @@
     if(Auth::user()->role==1 || Auth::user()->role==5 || Auth::user()->role==13 || Auth::user()->role==14){
 
         $unread_notifications = App\Models\Notification::where('role_read_at' , Null)
-                        ->where('read_by_role' , Null)
-                        ->where(function ($query)
-                        {
-                            $query->where('show_to_role' , Auth::user()->role)
-                                ->orWhere('show_to', Auth::user()->id);
-                        })
-                        ->orderBy('id' , 'desc')
-                        ->limit(50);
+                ->where('read_by_role' , Null)
+                ->where(function ($query)
+                {
+                    $query->where('show_to_role' , Auth::user()->role)
+                        ->orWhere('show_to', Auth::user()->id);
+                })
+                ->orderBy('id' , 'desc')
+                ->limit(50);
 
 
         $count=$unread_notifications->count();
@@ -109,7 +109,7 @@
                                                     {{html_entity_decode($notification->msg_body)}}
                                                     {{htmlspecialchars($notification->msg_body)}}
                                                 --}}
-                                                @if($notification->redirect == 'leads' || $notification->redirect=='newleads')
+                                                @if($notification->redirect == 'leads' || $notification->redirect=='newleads' || $notification->redirect == 'affiliators')
                                                 {{$notification->msg_body}}
                                                 @else
                                                 <?php echo base64_decode($notification->msg_body); ?>
