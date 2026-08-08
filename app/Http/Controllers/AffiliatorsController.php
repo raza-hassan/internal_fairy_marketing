@@ -18,6 +18,7 @@ use App\Models\Number;
 use Carbon\Carbon;
 use App\Models\Location;
 use App\Models\TransferAffiliator;
+use App\Models\AffiliatorShare;
 
 class AffiliatorsController extends Controller {
 
@@ -27,7 +28,16 @@ class AffiliatorsController extends Controller {
         {
             $id = 0;
             $search_person = 'user';
-            $affiliators = Affiliator::where('user_id',  Auth::user()->id)->where('is_delete',  0)->orderBy('id', 'desc')->paginate(30);
+            // Show affiliators the user owns, OR ones that have been shared with them
+            $affiliators = Affiliator::where(function ($query) {
+                        $query->where('user_id', Auth::user()->id)
+                              ->orWhereHas('sharedUsers', function ($q) {
+                                  $q->where('users.id', Auth::user()->id);
+                              });
+                    })
+                    ->where('is_delete',  0)
+                    ->with('sharedUsers')
+                    ->orderBy('id', 'desc')->paginate(30);
             // ====== Users With Helper======
                 $data = array(
                     'id' => Auth::user()->id,
@@ -430,7 +440,9 @@ class AffiliatorsController extends Controller {
 
         if(Auth::user()->can('affiliator.edit'))
         {
-            if ($affiliator->user_id != Auth::user()->id  && Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14) {
+            $isSharedWithMe = $affiliator->sharedUsers()->where('users.id', Auth::user()->id)->exists();
+
+            if ($affiliator->user_id != Auth::user()->id  && !$isSharedWithMe && Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14) {
                 return back()->withErrors(__('Not Allowed!'));
             }
             $managers = User::where('role', '=', 2)->get();
@@ -1782,7 +1794,7 @@ class AffiliatorsController extends Controller {
                         $query->whereIn('location_id', array_unique($allLocationIds));
                     }
 
-                    $affiliators = $query->orderBy('id', 'desc')->paginate(30);
+                    $affiliators = $query->with('sharedUsers')->orderBy('id', 'desc')->paginate(30);
 
                 } else {
 
@@ -1790,8 +1802,14 @@ class AffiliatorsController extends Controller {
                         ->orWhere('parent', Auth::user()->id)
                         ->pluck('id');
 
+                    // Own affiliators OR ones shared with the current user
                     $query = Affiliator::where($condition)
-                        ->whereIn('user_id', $users);
+                        ->where(function ($q) use ($users) {
+                            $q->whereIn('user_id', $users)
+                              ->orWhereHas('sharedUsers', function ($sq) {
+                                  $sq->where('users.id', Auth::user()->id);
+                              });
+                        });
 
                     if ($request->input('phone') != '') {
                         $query->whereIn('id', $affiliator_numbers);
@@ -1806,16 +1824,24 @@ class AffiliatorsController extends Controller {
                         $query->whereIn('location_id', array_unique($allLocationIds));
                     }
 
-                    $affiliators = $query->orderBy('id', 'desc')->paginate(30);
+                    $affiliators = $query->with('sharedUsers')->orderBy('id', 'desc')->paginate(30);
 
                 }
 
             } else {
                 if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
-                    $affiliators = Affiliator::orderBy('id', 'desc')->paginate(30);
+                    $affiliators = Affiliator::with('sharedUsers')->orderBy('id', 'desc')->paginate(30);
                 } else {
                     $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-                    $affiliators = Affiliator::whereIn('user_id', $users)->orWhere('user_id', Auth::user()->id)->orderBy('id', 'desc')->paginate(30);
+                    $affiliators = Affiliator::where(function ($q) use ($users) {
+                                $q->whereIn('user_id', $users)
+                                  ->orWhere('user_id', Auth::user()->id)
+                                  ->orWhereHas('sharedUsers', function ($sq) {
+                                      $sq->where('users.id', Auth::user()->id);
+                                  });
+                            })
+                            ->with('sharedUsers')
+                            ->orderBy('id', 'desc')->paginate(30);
                 }
             }
 
@@ -1889,6 +1915,77 @@ class AffiliatorsController extends Controller {
             // ==========================================
 
             return back()->withInput()->withStatus(__('Affiliator Tranfered Successfully.'));
+        } else {
+            return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
+        }
+    }
+
+
+    public function shareAffiliatorStore(Request $request)
+    {
+        if (Auth::user()->can('affiliator.share')) {
+
+            $request->validate([
+                'affiliator_id' => 'required|exists:affiliators,id',
+                'share_user_ids' => 'required|array|min:1',
+                'share_user_ids.*' => 'exists:users,id',
+            ]);
+
+            $affiliator = Affiliator::findOrFail($request->affiliator_id);
+            $shared_by = Auth::user();
+
+            foreach ($request->share_user_ids as $shareUserId)
+            {
+                // don't let someone "share" it with the current owner, that's a no-op
+                if ($shareUserId == $affiliator->user_id) {
+                    continue;
+                }
+
+                AffiliatorShare::firstOrCreate(
+                    [
+                        'affiliator_id' => $affiliator->id,
+                        'user_id' => $shareUserId,
+                    ],
+                    [
+                        'shared_by' => $shared_by->id,
+                    ]
+                );
+
+                // ===============Notification===============
+                $user = User::where('id', $shareUserId)->first();
+
+                $data = array(
+                    'type' => 'Affiliator Shared',
+                    'msg_body' => base64_encode('Affiliator "' . $affiliator->name . '" Has Been Shared With You By ' . $shared_by->name . ' ID : <a href="'.url("/affiliators/$affiliator->id/edit/").'">'.$affiliator->id.'</a>'),
+                    'created_by' => $shared_by->id,
+                    'show_to' => $user->id,
+                    'show_to_role' => 0,
+                    'redirect' => 'affiliators',
+                );
+                Helper::notification($data);
+                // ==========================================
+            }
+
+            return back()->withInput()->withStatus(__('Affiliator Shared Successfully.'));
+        } else {
+            return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
+        }
+    }
+
+    public function shareAffiliatorRemove(Request $request)
+    {
+        if (Auth::user()->can('affiliator.share')) {
+
+            $request->validate([
+                'affiliator_id' => 'required|exists:affiliators,id',
+                'user_id' => 'required|exists:users,id',
+            ]);
+
+            AffiliatorShare::where('affiliator_id', $request->affiliator_id)
+                ->where('user_id', $request->user_id)
+                ->delete();
+
+            return back()->withInput()->withStatus(__('Share Removed Successfully.'));
         } else {
             return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }

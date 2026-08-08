@@ -255,16 +255,14 @@
                                         <div class="ripple-container"></div>
                                     </button>
                                     @endif
-                                    {{-- @if(Auth::user()->can('affiliator.share'))
-                                    @if($affiliator->share_id == 0)
-                                    <a rel="tooltip" href="#" data-original-title="" title="" data-toggle="modal"
-                                        data-affiliator_id="<?php echo $affiliator->id; ?>"
-                                        from-user='<?php echo $lead->user_id; ?>' data-target="#leadshare"
-                                        id="shareLead">
+                                    @if(Auth::user()->can('affiliator.share'))
+                                    <a rel="tooltip" href="#" data-original-title="" title="Share"
+                                        class="shareAffiliator" data-toggle="modal" data-target="#shareAffiliatorModal"
+                                        data-affiliator_id="{{ $affiliator->id }}"
+                                        data-shared-users='{{ $affiliator->sharedUsers->map(fn($u) => ["id" => $u->id, "name" => $u->name])->toJson() }}'>
                                         <i class="fa fa-share-alt" aria-hidden="true"></i>
                                     </a>
                                     @endif
-                                    @endif --}}
                                     @if(Auth::user()->can('affiliator.transfer'))
                                     <a href="#" class="transferAffiliator" data-toggle="modal"
                                         data-target="#transferAffiliatorMoal" data-affiliator_id="{{ $affiliator->id }}"
@@ -335,6 +333,44 @@
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-success button" id="transfer_task">Transfer</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal fade" id="shareAffiliatorModal" role="dialog">
+            <div class="modal-dialog modal-default">
+                <form method="post" action="{{ url('affiliator/share/store') }}" class="form-horizontal"
+                    id="share_affiliator_form" enctype="multipart/form-data">
+                    @csrf
+                    @method('post')
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <figure class="ps-block--form-box">
+                                <figcaption>Share Affiliator</figcaption>
+                                <div class="ps-block__content">
+                                    <input type="hidden" name="affiliator_id" id="share_affiliator_id">
+                                    <div class="form-group">
+                                        <label style="margin-bottom: 20px !important;">Currently Shared With</label>
+                                        <div id="current_shared_users"><em>No one yet</em></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Share With<sup>*</sup></label>
+                                        <select class="form-control" name="share_user_ids[]" {{--multiple}--}} required>
+                                            @foreach($users as $user)
+                                            <option value="{{$user->id}}">{{$user->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </figure>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success button" id="share_task">Share</button>
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         </div>
                     </div>
@@ -515,6 +551,46 @@
         var fromUserId   = $(this).data('from_user_id');
         $('#taffiliator_id').val(affiliatorId);
         $('#tfrom_user_id').val(fromUserId);
+    });
+
+    $(document).on('click', '.shareAffiliator', function () {
+        var affiliatorId = $(this).data('affiliator_id');
+        var sharedUsers = $(this).data('shared-users'); // jQuery auto-parses the JSON in this data-* attribute
+        $('#share_affiliator_id').val(affiliatorId);
+
+        var html = '';
+        if (sharedUsers && sharedUsers.length > 0) {
+            sharedUsers.forEach(function (u) {
+                html += '<span class="badge badge-info mr-1" style="display:inline-flex; align-items: center;padding:5px 8px;margin:2px;background:#446161;border-radius:4px;">'
+                     + u.name
+                     + ' <a href="#" class="removeShare" data-affiliator_id="' + affiliatorId + '" data-user_id="' + u.id + '" style="color:red;margin-left:10px;font-size: 25px;">&times;</a>'
+                     + '</span>';
+            });
+        } else {
+            html = '<em>No one yet</em>';
+        }
+        $('#current_shared_users').html(html);
+    });
+
+    $(document).on('click', '.removeShare', function (e) {
+        e.preventDefault();
+        var affiliatorId = $(this).data('affiliator_id');
+        var userId = $(this).data('user_id');
+        var token = "{{csrf_token()}}";
+        var $badge = $(this).parent();
+
+        $.ajax({
+            type: 'POST',
+            url: "{{ url('affiliator/share/remove') }}",
+            data: {
+                affiliator_id: affiliatorId,
+                user_id: userId,
+                _token: token
+            },
+            success: function () {
+                $badge.remove();
+            }
+        });
     });
 </script>
 @endsection

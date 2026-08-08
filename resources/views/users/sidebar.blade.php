@@ -20,7 +20,7 @@
                         <li><a class="active" href="{{url('admin')}}"><i class="icon-home"></i>Dashboard</a></li>
 
                         @if(Auth::user()->can('staff.view'))
-                            <li><a href="{{url('staff')}}"><i class="fa-solid fa-users-gear"></i>Manage Staff</a></li>
+                            <li><a href="{{route('view.staff')}}"><i class="fa-solid fa-users-gear"></i>Manage Staff</a></li>
                             <li><a href="{{url('inactive-staff')}}"><i class="fa-solid fa-users-gear"></i>Inactive Staff</a></li>
                         @endif
 
