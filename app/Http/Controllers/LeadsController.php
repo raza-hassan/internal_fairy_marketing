@@ -608,20 +608,17 @@ class LeadsController extends Controller
                 'international_phone_dynamic.*' => 'required'
             ]);
 
-            $numericValues = array();
             $international_full_number = array();
 
-            foreach ($request->international_phone_dynamic as $key => $value) {
-                if (is_numeric($key)) {
-                    $numericValues[] = $value;
-                } else {
-                    $international_full_number[$key] = $value;
+            foreach ($request->all() as $key => $value) {
+                if (preg_match('/^international_full_number(\d+)$/', $key, $matches)) {
+                    $international_full_number[(int) $matches[1]] = $value;
                 }
             }
 
             // echo "<pre>";print_r($international_full_number); exit;
 
-            foreach ($international_full_number as $key => $number) {
+            foreach ($international_full_number as $counter => $number) {
                 if ($number != '' && is_numeric($number)) {
                     $record = Number::Where('number', 'like', '%' . $number . '%')->first();
 
@@ -658,36 +655,12 @@ class LeadsController extends Controller
                 $phone = $request->input('full_number');
             }
 
-            // if ($request->telephone != '') {
-            //     $telephone = $request->countryCode1 . $request->telephone;
-            // } else {
             $telephone = '';
-            // }
-
-            // if ($request->telephone1 != '') {
-            //     $telephone1 = $request->countryCode2 . $request->telephone1;
-            // } else {
             $telephone1 = '';
-            // }
-
-            // $phone = $request->input('full_number');
-            //$record = Clients::where('phone', $phone)->first();
-            // $record=Number::Where('number', 'like', '%'.$phone.'%')->first();
-            // print_r($record->phone); exit;
-
 
             if ($phone != '') {
                 $record = Number::Where('number', 'like', '%' . $phone . '%')->first();
             }
-            // if ($phone != '' && $telephone != '') {
-            //     $record=Number::Where('number', 'like', '%'.$phone.'%')->orWhere('Number', 'like', '%'.$telephone.'%')->first();
-            // }if ($phone != '' && $telephone == '' && $telephone1 != ''){
-            //     $record=Number::Where('number', 'like', '%'.$phone.'%')->orWhere('Number', 'like', '%'.$telephone1.'%')->first();
-            // }if ($phone != '' && $telephone != '' && $telephone1 != ''){
-            //     $record=Number::Where('number', 'like', '%'.$phone.'%')->orWhere('Number', 'like', '%'.$telephone.'%')->orWhere('Number', 'like', '%'.$telephone1.'%')->first();
-            // }
-
-            // echo "<pre>"; print_r($record); exit;
 
             if (empty($record)) {
 
@@ -713,16 +686,10 @@ class LeadsController extends Controller
                     return back()->withErrors(['Your Source is Affiliator. You must need to select Affiliator for this lead.']);
                 }
 
-
-                // print_r($phone);
-                // exit;
                 $client = Clients::firstOrCreate(
                     [
                         'name' => $request->name,
                         'email' => $request->email,
-                        // 'phone' => $request->countryCode . $request->phone,
-                        // 'phone' => $request->phone,
-                        // 'phone' => $request->full_number,
                         'phone' => $phone,
                         'telephone' => $telephone,
                         'telephone1' => $telephone1,
@@ -735,7 +702,6 @@ class LeadsController extends Controller
                     ],
                     [
                         'email' => $request->email,
-                        // 'phone' => $request->full_number
                         'phone' => $phone,
                     ]
                 );
@@ -750,20 +716,9 @@ class LeadsController extends Controller
                         Number::insert(['number' => $phone, 'type' => 'clients', 'client_id' => $client->id,]);
                     }
                 }
-                // if ($request->telephone != ''){
-                //     $number_record=Number::Where('number', 'like', '%'.$telephone.'%')->first();
-                //     if (empty($number_record)){
-                //         Number::insert( [ 'number' => $telephone, 'type' => 'clients', 'client_id' => $client->id, ]);
-                //     }
-                // }if ($request->telephone1 != ''){
-                //     $number_record=Number::Where('number', 'like', '%'.$telephone1.'%')->first();
-                //     if (empty($number_record)){
-                //         Number::insert( [ 'number' => $telephone1, 'type' => 'clients', 'client_id' => $client->id, ]);
-                //     }
-                // }
 
                 if ($request->international_phone_dynamic) {
-                    foreach ($international_full_number as $key => $number) {
+                    foreach ($international_full_number as $counter => $number) {
                         if ($number != '' && is_numeric($number)) {
                             $check = Number::Where('number', 'like', '%' . $number . '%')->first();
 
@@ -796,7 +751,6 @@ class LeadsController extends Controller
                 $data = array(
                     'name' => $request->name,
                     'email' => $request->email,
-                    // 'phone' => $request->full_number,
                     'phone' => $phone,
                     'address' => $request->address,
                     'user' => $lead->leadAgent->name,
@@ -806,12 +760,7 @@ class LeadsController extends Controller
                     'notes' => $request->note,
                 );
 
-                //  print_r($data); exit;
-                //$to_email = Auth::user()->email;
-                // $to_email = ['shoaib.khubaib@fairymarketing.com', 'shahid.shahid34@gmail.com'];
-
-
-                // // ==========Comment=============
+                // ==========Comment=============
                 // $to_email = ['shoaib.khubaib@fairymarketing.com'];
                 // $to_name = Auth::user()->name;
                 // Mail::send('leads.lead-mail', $data, function ($message) use ($to_name, $to_email) {
@@ -819,7 +768,7 @@ class LeadsController extends Controller
                 //             ('Lead Create Notification');
                 //     $message->from(config('mail.from.address'), Config('mail.from.name'));
                 // });
-                // // ==========Comment=============
+                // ==========Comment=============
 
                 return redirect('leads')->withStatus(__('Leads Created Successfully.'));
             } else {
@@ -877,14 +826,9 @@ class LeadsController extends Controller
                     $phone = $request->input('full_number');
                 }
 
-
-                //    echo $phone; exit;
-
                 $data = array(
                     'name' => $record->name,
                     'email' => $record->email,
-                    // 'phone' => $request->phone,
-                    // 'phone' => $request->full_number,
                     'phone' => $phone,
                     'address' => $record->address,
                     'user' => $lead->leadAgent->name,
@@ -894,7 +838,6 @@ class LeadsController extends Controller
                     'notes' => $request->note,
                 );
 
-                // $to_email = [Auth::user()->email, 'shoaib.khubaib@fairymarketing.com', 'shahid.shahid34@gmail.com'];
                 $to_email = [Auth::user()->email, 'shoaib.khubaib@fairymarketing.com'];
 
                 $to_name = Auth::user()->name;
@@ -908,10 +851,10 @@ class LeadsController extends Controller
 
                 if (empty($phone_number)) {
                     if ($request->phone != '') {
-                        Number::insert(['number' => $phone_number, 'type' => 'clients', 'client_id' => $record->id,]);
+                        Number::insert(['number' => $phone, 'type' => 'clients', 'client_id' => $record->id,]);
                     }
                     if ($request->ptclphone != '') {
-                        Number::insert(['number' => $phone_number, 'type' => 'clients', 'client_id' => $record->id,]);
+                        Number::insert(['number' => $phone, 'type' => 'clients', 'client_id' => $record->id,]);
                     }
                 }
 
@@ -990,22 +933,17 @@ class LeadsController extends Controller
                     'international_phone_dynamic.*' => 'required'
                 ]);
 
-                $numericValues = array();
                 $international_full_number = array();
 
-                foreach ($request->international_phone_dynamic as $key => $value) {
-                    if (is_numeric($key)) {
-                        $numericValues[] = $value;
-                    } else {
-                        $international_full_number[$key] = $value;
+                foreach ($request->all() as $key => $value) {
+                    if (preg_match('/^international_full_number(\d+)$/', $key, $matches)) {
+                        $international_full_number[(int) $matches[1]] = $value;
                     }
                 }
                 // echo "<pre>";print_r($international_full_number); exit;
 
-                foreach ($international_full_number as $key => $number) {
+                foreach ($international_full_number as $counter => $number) {
                     if ($number != '' && is_numeric($number)) {
-                        // $record=Number::Where('number', 'like', '%'.$phone_number.'%')->first();
-
                         $record = Number::Where('client_id', '!=', $lead->client_id)
                             ->where(function ($query) use ($number) {
                                 $query->orWhere('Number', 'like', '%' . $number . '%');
@@ -1043,21 +981,16 @@ class LeadsController extends Controller
                     ]
                 );
 
-                $editnumericValues = array();
                 $edit_international_full_number = array();
 
-                foreach ($request->edit_international_phone_dynamic as $key => $value) {
-                    if (is_numeric($key)) {
-                        $editnumericValues[] = $value;
-                    } else {
-                        $edit_international_full_number[$key] = $value;
+                foreach ($request->all() as $key => $value) {
+                    if (preg_match('/^edit_international_full_number(\d+)$/', $key, $matches)) {
+                        $edit_international_full_number[(int) $matches[1]] = $value;
                     }
                 }
 
-                foreach ($edit_international_full_number as $key => $number) {
+                foreach ($edit_international_full_number as $counter => $number) {
                     if ($number != '' && is_numeric($number)) {
-                        // $record=Number::Where('number', 'like', '%'.$phone_number.'%')->first();
-
                         $record = Number::Where('client_id', '!=', $lead->client_id)
                             ->where(function ($query) use ($number) {
                                 $query->orWhere('Number', 'like', '%' . $number . '%');
@@ -1132,58 +1065,8 @@ class LeadsController extends Controller
                     ]);
                 }
 
-                // if($request->multi_phone)
-                // {
-                //     foreach ($request->multi_phone as $key => $number)
-                //     {
-                //         if ($request->countryCode[$key] != ''){
-                //             $phone_number = $request->countryCode[$key] . $number['number-'.$key];
-                //         }else{
-                //             $phone_number = $number['number-'.$key];
-                //         }
-                //         if($phone_number !='' && is_numeric($phone_number))
-                //         {
-                //             $check=Number::Where('client_id' , $lead->client_id)->Where('Number', 'like', '%'.$phone_number.'%')->first();
-                //             if (empty($check))
-                //             {
-                //                 Number::insert([ 'number' => $phone_number, 'type' => 'clients', 'client_id' => $lead->client_id,]);
-                //             }
-                //         }
-                //     }
-                // }
-
-                // if($request->edit_multi_phone)
-                // {
-                //     foreach ($request->edit_multi_phone as $key => $number)
-                //     {
-                //         if($request->edit_countryCode[$key] != ''){
-                //             $phone_number = $request->edit_countryCode[$key] . $number['number-'.$key];
-                //         }else{
-                //             $phone_number = $number['number-'.$key];
-                //         }
-
-                //         if($phone_number !='' && is_numeric($phone_number))
-                //         {
-                //             $exist=Number::Where('Number', 'like', '%'.$phone_number.'%')->first();
-
-                //             if (empty($exist))
-                //             {
-                //                 $id = $request->number_id[$key];
-
-                //                 Number::findOrFail($id)->update([
-                //                     'number' => $phone_number,
-                //                     'type' => 'clients',
-                //                     'client_id' => $lead->client_id,
-                //                 ]);
-                //             }
-                //         }
-                //     }
-                //     // exit;
-                // }
-
-
                 if ($request->international_phone_dynamic) {
-                    foreach ($international_full_number as $key => $number) {
+                    foreach ($international_full_number as $counter => $number) {
                         if ($number != '' && is_numeric($number)) {
                             $check = Number::Where('client_id', $lead->client_id)->Where('Number', 'like', '%' . $number . '%')->first();
                             if (empty($check)) {
@@ -1194,23 +1077,18 @@ class LeadsController extends Controller
                 }
 
                 if ($request->edit_international_phone_dynamic) {
-                    $counter = 0;
-                    foreach ($edit_international_full_number as $key => $number) {
-                        $counter = $counter + 1;
-
+                    foreach ($edit_international_full_number as $counter => $number) {
                         if ($number != '' && is_numeric($number)) {
                             $exist = Number::Where('Number', 'like', '%' . $number . '%')->first();
 
                             if (empty($exist)) {
-                                if ('edit_international_full_number' . $counter == $key) {
-                                    $id = $request->edit_phone_number_ids[$counter];
+                                $id = $request->edit_phone_number_ids[$counter];
 
-                                    Number::findOrFail($id)->update([
-                                        'number' => $number,
-                                        'type' => 'clients',
-                                        'client_id' => $lead->client_id,
-                                    ]);
-                                }
+                                Number::findOrFail($id)->update([
+                                    'number' => $number,
+                                    'type' => 'clients',
+                                    'client_id' => $lead->client_id,
+                                ]);
                             }
                         }
                     }

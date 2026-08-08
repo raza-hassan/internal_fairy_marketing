@@ -296,124 +296,28 @@
         </form>
     </section>
 </div>
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/css/intlTelInput.css">
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/intlTelInput.js"></script>
+@include('partials.phone-validator-assets')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
 {{-- End JQuery Phone Plugin Cdn --}}
 <script>
-    var input = document.querySelector(".phone"),
-    errorMap = ["Invalid number", "Invalid country code", "Too short", "Too long", "Invalid number"],
-    result = document.querySelector("#result");
     window.addEventListener("load", function ()
     {
-        errorMsg = document.querySelector("#error-msg");
-        function getIp(callback)
-        {
-            fetch('https://ipinfo.io', { headers: { 'Accept': 'application/json' }})
-            .then((resp) => resp.json())
-            .catch(() => {
-                return {
-                country: '',
-                };
-            })
-            .then((resp) => callback(resp.country));
-        }
-        var iti = window.intlTelInput(input,
-        {
-            // allowDropdown: false,
-            // dropdownContainer: document.body,
-            // excludeCountries: ["us"],
-            hiddenInput: "full_number",
-            nationalMode: true,
-            // formatOnDisplay: true,
-            formatOnDisplay: false, // =======here is the issue if true create issue (with this number +60189181388) if false then work ok=======
-            separateDialCode: true,
-            autoHideDialCode: true,
-            autoPlaceholder: "aggressive" ,
-            initialCountry: "pk",
-            placeholderNumberType: "MOBILE",
-            preferredCountries: ['il','ge'],
-            geoIpLookup: getIp,
-            // utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/utils.js",
-            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/utils.js",
+        PhoneFieldValidator.init(document.querySelector(".phone"), {
+            errorMsgEl: document.querySelector("#error-msg"),
+            resultEl: document.querySelector("#result"),
+            hiddenFieldName: "full_number",
         });
-        input.addEventListener('keyup', formatIntlTelInput);
-        input.addEventListener('change', formatIntlTelInput);
-        function formatIntlTelInput()
-        {
-            if (typeof intlTelInputUtils !== 'undefined')    // utils are lazy loaded, so must check
-            {
-                var currentText = iti.getNumber(intlTelInputUtils.numberFormat.E164);
-                if (typeof currentText === 'string')    // sometimes the currentText is an object :)
-                {
-                    iti.setNumber(currentText); // will autoformat because of formatOnDisplay=true
-                }
-            }
-        }
-        input.addEventListener('keyup', function ()
-        {
-            reset();
-            if (input.value.trim()) {
-                if (iti.isValidNumber())
-                {
-                    $(input).addClass('form-control is-valid');
-                }
-                else
-                {
-                    $(input).addClass('form-control is-invalid');
-                    var errorCode = iti.getValidationError();
-                    errorMsg.innerHTML = errorMap[errorCode];
-                    $(errorMsg).show();
-                }
-            }
-        });
-        input.addEventListener('change', reset);
-        input.addEventListener('keyup', reset);
-        var reset = function ()
-        {
-            $(input).removeClass('form-control is-invalid');
-            errorMsg.innerHTML = "";
-            $(errorMsg).hide();
-        };
-        ////////////// testing - start //////////////
-        input.addEventListener('keyup', function(e)
-        {
-            e.preventDefault();
-            var num = iti.getNumber(),
-            valid = iti.isValidNumber();
-            if(valid==true)
-            {
-                result.textContent = "Number: " + num + ", Correct ";
-            }
-            else
-            {
-                result.textContent = "Number: " + num + ", Wrong ";
-            }
-            // result.textContent = "Number: " + num + ", valid: " + valid;
-        }, false);
-        input.addEventListener("focus", function()
-        {
-            result.textContent = "";
-        }, false);
-        $(input).on("focusout", function(e, countryData)
-        {
-            var intlNumber = iti.getNumber();
-            console.log(intlNumber);
-            // document.getElementById("country_code").innerHTML = intlNumber;
-            // alert(intlNumber);
-        });
-        ////////////// testing - end //////////////
     });
-      //-----------------------only-phone-number-input code (with +)-------------------------------start-------//
-       function isPhoneNumberKey(evt)
-       {
-           var charCode = (evt.which) ? evt.which : evt.keyCode
-           if (charCode != 43 && charCode > 31 && (charCode < 48 || charCode > 57))
-               return false;
-           return true;
-       }
-       //-----------------------only-phone-number-input code (with +)-------------------------------end-------//
+    //-----------------------only-phone-number-input code (with +)-------------------------------start-------//
+    function isPhoneNumberKey(evt)
+    {
+        var charCode = (evt.which) ? evt.which : evt.keyCode
+        if (charCode != 43 && charCode > 31 && (charCode < 48 || charCode > 57))
+            return false;
+        return true;
+    }
+    //-----------------------only-phone-number-input code (with +)-------------------------------end-------//
 </script>
 {{-- End Internation Telephone JQuery Plugin code --}}
 
@@ -700,8 +604,6 @@
     // Define a function to be reused
     function handleClick()
     {
-        // alert('ok');
-
         var phoneFieldsContainer = document.getElementById("dynamicphoneFields");
 
         // Create Row div
@@ -778,101 +680,11 @@
         // add buttton into second div
         col2Div.appendChild(button);     // Append the button to the second column div
 
-
-        function getIp(callback)
-        {
-            fetch('https://ipinfo.io', { headers: { 'Accept': 'application/json' }})
-            .then((resp) => resp.json())
-            .catch(() => {
-                return {
-                country: '',
-                };
-            })
-            .then((resp) => callback(resp.country));
-        }
-
-        // Initialize the new phone input element
-        var iti = window.intlTelInput(phoneInput,
-        {
-            hiddenInput: "international_full_number"+counter,
-            nationalMode: true,
-            formatOnDisplay: true,
-            separateDialCode: true,
-            autoHideDialCode: true,
-            autoPlaceholder: "aggressive" ,
-            initialCountry: "pk",
-            placeholderNumberType: "MOBILE",
-            preferredCountries: ['il','ge'],
-            geoIpLookup: getIp,
-            // utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/utils.js",
-            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/utils.js",
+        PhoneFieldValidator.init(phoneInput, {
+            errorMsgEl: errorMsg,
+            resultEl: result,
+            hiddenFieldName: "international_full_number" + counter,
         });
-        // Add event listeners for the new phone input element
-        phoneInput.addEventListener('keyup', formatIntlTelInput);
-        phoneInput.addEventListener('change', formatIntlTelInput);
-
-        function formatIntlTelInput() {
-            if (typeof intlTelInputUtils !== 'undefined') {
-                var currentText = iti.getNumber(intlTelInputUtils.numberFormat.E164);
-                if (typeof currentText === 'string') {
-                    iti.setNumber(currentText);
-                }
-            }
-        }
-
-        phoneInput.addEventListener('keyup', function ()
-        {
-            reset();
-            if (phoneInput.value.trim()) {
-                if (iti.isValidNumber())
-                {
-                    $(phoneInput).addClass('form-control is-valid');
-                }
-                else
-                {
-                    $(phoneInput).addClass('form-control is-invalid');
-                    var errorCode = iti.getValidationError();
-                    errorMsg.innerHTML = errorMap[errorCode];
-                    $(errorMsg).show();
-                }
-            }
-        });
-        phoneInput.addEventListener('change', reset);
-        phoneInput.addEventListener('keyup', reset);
-        var reset = function ()
-        {
-            $(phoneInput).removeClass('form-control is-invalid');
-            errorMsg.innerHTML = "";
-            $(errorMsg).hide();
-        };
-        ////////////// testing - start //////////////
-        phoneInput.addEventListener('keyup', function(e)
-        {
-            e.preventDefault();
-            var num = iti.getNumber(),
-            valid = iti.isValidNumber();
-            if(valid==true)
-            {
-                result.textContent = "Number: " + num + ", Correct ";
-            }
-            else
-            {
-                result.textContent = "Number: " + num + ", Wrong ";
-            }
-            // result.textContent = "Number: " + num + ", valid: " + valid;
-        }, false);
-        phoneInput.addEventListener("focus", function()
-        {
-            result.textContent = "";
-        }, false);
-        $(phoneInput).on("focusout", function(e, countryData)
-        {
-            var intlNumber = iti.getNumber();
-            console.log(intlNumber);
-            // document.getElementById("country_code").innerHTML = intlNumber;
-            // alert(intlNumber);
-        });
-
     }
 
     // Add the click event listener to multiple elements with different IDs
@@ -933,114 +745,22 @@
 
     $(document).ready(function()
     {
-        function initializeInputField(phoneInput ,counter , result , errorMsg)
-        {
-            function getIp(callback)
-            {
-                fetch('https://ipinfo.io', { headers: { 'Accept': 'application/json' }})
-                .then((resp) => resp.json())
-                .catch(() => {
-                    return {
-                    country: '',
-                    };
-                })
-                .then((resp) => callback(resp.country));
-            }
-
-            // Initialize the new phone input element
-            var iti = window.intlTelInput(phoneInput,
-            {
-                hiddenInput: "edit_international_full_number"+counter,
-                nationalMode: true,
-                formatOnDisplay: true,
-                separateDialCode: true,
-                autoHideDialCode: true,
-                autoPlaceholder: "aggressive" ,
-                initialCountry: "pk",
-                placeholderNumberType: "MOBILE",
-                preferredCountries: ['il','ge'],
-                geoIpLookup: getIp,
-                // utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/utils.js",
-                utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/utils.js",
-            });
-            // Add event listeners for the new phone input element
-            phoneInput.addEventListener('keyup', formatIntlTelInput);
-            phoneInput.addEventListener('change', formatIntlTelInput);
-
-            function formatIntlTelInput() {
-                if (typeof intlTelInputUtils !== 'undefined') {
-                    var currentText = iti.getNumber(intlTelInputUtils.numberFormat.E164);
-                    if (typeof currentText === 'string') {
-                        iti.setNumber(currentText);
-                    }
-                }
-            }
-
-            phoneInput.addEventListener('keyup', function ()
-            {
-                reset();
-                if (phoneInput.value.trim()) {
-                    if (iti.isValidNumber())
-                    {
-                        $(phoneInput).addClass('form-control is-valid');
-                    }
-                    else
-                    {
-                        $(phoneInput).addClass('form-control is-invalid');
-                        var errorCode = iti.getValidationError();
-                        errorMsg.innerHTML = errorMap[errorCode];
-                        $(errorMsg).show();
-                    }
-                }
-            });
-            phoneInput.addEventListener('change', reset);
-            phoneInput.addEventListener('keyup', reset);
-            var reset = function ()
-            {
-                $(phoneInput).removeClass('form-control is-invalid');
-                errorMsg.innerHTML = "";
-                $(errorMsg).hide();
-            };
-            ////////////// testing - start //////////////
-            phoneInput.addEventListener('keyup', function(e)
-            {
-                e.preventDefault();
-                var num = iti.getNumber(),
-                valid = iti.isValidNumber();
-                if(valid==true)
-                {
-                    result.textContent = "Number: " + num + ", Correct ";
-                }
-                else
-                {
-                    result.textContent = "Number: " + num + ", Wrong ";
-                }
-                // result.textContent = "Number: " + num + ", valid: " + valid;
-            }, false);
-            phoneInput.addEventListener("focus", function()
-            {
-                result.textContent = "";
-            }, false);
-            $(phoneInput).on("focusout", function(e, countryData)
-            {
-                var intlNumber = iti.getNumber();
-                console.log(intlNumber);
-                // document.getElementById("country_code").innerHTML = intlNumber;
-                // alert(intlNumber);
-            });
-
-        }
-
         var phoneInputs = document.querySelectorAll('.search_edit_international_multiphone_number');
-        var counter = document.querySelectorAll('.counter');
 
-        phoneInputs.forEach(function(input, counter)
+        phoneInputs.forEach(function(phoneInput, index)
         {
-            var counter=counter+1;
-            var result = document.querySelector("#result"+counter);
-            var errorMsg = document.querySelector("#error-msg"+counter);
+            var counter = index + 1;
+            var result = document.querySelector("#result" + counter);
+            var errorMsg = document.querySelector("#error-msg" + counter);
 
-            initializeInputField(input ,counter , result , errorMsg);
+            // PhoneFieldValidator automatically validates on load when the
+            // field already has a value (existing saved number), so the
+            // correct/invalid state shows immediately without typing.
+            PhoneFieldValidator.init(phoneInput, {
+                errorMsgEl: errorMsg,
+                resultEl: result,
+                hiddenFieldName: "edit_international_full_number" + counter,
+            });
         });
     });
 
