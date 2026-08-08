@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\TransferAffiliator;
+
 class Affiliator extends Model
 {
 
@@ -34,23 +37,28 @@ class Affiliator extends Model
         'location_id',
 
     ];
-    public function assigned() {
-        return $this->belongsTo(\App\Models\User::class, 'user_id','id');
+    public function assigned()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id', 'id');
     }
-    public function leads_count() {
-        return $this->hasMany(\App\Models\Leads::class, 'afflilate_id','id');
+    public function leads_count()
+    {
+        return $this->hasMany(\App\Models\Leads::class, 'afflilate_id', 'id');
     }
     public function last_lead()
     {
-        return $this->hasOne(Leads::class, 'afflilate_id','id')->latest();
+        return $this->hasOne(Leads::class, 'afflilate_id', 'id')->latest();
     }
-    public function lastlead() {
-        return $this->hasOne(Leads::class, 'afflilate_id')->latest(); 
+    public function lastlead()
+    {
+        return $this->hasOne(Leads::class, 'afflilate_id')->latest();
     }
-    public function taskStatus() {
+    public function taskStatus()
+    {
         return $this->hasOne(AffiliatorTask::class, 'affliator_id')->latest();
     }
-    public function affiliatorNumbers() {
+    public function affiliatorNumbers()
+    {
         return $this->hasMany(Number::class, 'client_id');
     }
     public function leadtrash()
@@ -61,5 +69,12 @@ class Affiliator extends Model
     public function transferHistories()
     {
         return $this->hasMany(TransferAffiliator::class);
+    }
+
+    public function sharedUsers()
+    {
+        return $this->belongsToMany(User::class, 'affiliator_shares', 'affiliator_id', 'user_id')
+            ->withPivot('shared_by')
+            ->withTimestamps();
     }
 }

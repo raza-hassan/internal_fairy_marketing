@@ -392,7 +392,8 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function() {
             Route::post('all/affiliator/get_affiliator_task_history', [App\Http\Controllers\AffiliatorsController::class, 'get_affiliator_task_history']);
             Route::post('all/affiliator/getafitasksubtype', [App\Http\Controllers\AffiliatorsController::class, 'getafitasksubtype']);
             Route::post('affiliator/transfer/store', [App\Http\Controllers\AffiliatorsController::class, 'transferAffiliatorStore']);
-
+            Route::post('affiliator/share/store', [App\Http\Controllers\AffiliatorsController::class, 'shareAffiliatorStore']);
+            Route::post('affiliator/share/remove', [App\Http\Controllers\AffiliatorsController::class, 'shareAffiliatorRemove']);
 
             // Affiliator Trash Routes
             Route::get('/trash/affiliators', [App\Http\Controllers\AffiliatorsController::class, 'trash_affiliators']);
