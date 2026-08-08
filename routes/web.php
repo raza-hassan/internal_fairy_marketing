@@ -15,8 +15,8 @@ use App\Http\Controllers\LocationController;
   |
  */
 
- // Clear Chache route
- Route::get('/cache_clear', function() {
+// Clear Chache route
+Route::get('/cache_clear', function () {
     $exitCode    = Artisan::call('cache:clear');
     $config      = Artisan::call('config:cache');
     $view        = Artisan::call('view:clear');
@@ -42,8 +42,7 @@ Auth::routes();
 Route::get('admin/login', [App\Http\Controllers\Auth\LoginController::class, 'vip_login']);
 Route::get('admin/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout']);
 
-Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'role']], function()
-{
+Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'role']], function () {
     Route::get('/', [App\Http\Controllers\admin\HomeController::class, 'index']);
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index']);
     Route::get('/managers', [App\Http\Controllers\UserController::class, 'accountant']);
@@ -185,13 +184,13 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'role']], function()
     Route::put('/designations/update/{designations}', [App\Http\Controllers\admin\DesignationController::class, 'update']);
     Route::delete('/designations/destroy/{designations}', [App\Http\Controllers\admin\DesignationController::class, 'destroy']);
 
-     // offices
-     Route::get('/offices', [App\Http\Controllers\admin\OfficeController::class, 'index']);
-     Route::get('/offices/create', [App\Http\Controllers\admin\OfficeController::class, 'create']);
-     Route::post('/offices/store', [App\Http\Controllers\admin\OfficeController::class, 'store']);
-     Route::get('/offices/edit/{offices}', [App\Http\Controllers\admin\OfficeController::class, 'edit']);
-     Route::put('/offices/update/{offices}', [App\Http\Controllers\admin\OfficeController::class, 'update']);
-     Route::delete('/offices/destroy/{offices}', [App\Http\Controllers\admin\OfficeController::class, 'destroy']);
+    // offices
+    Route::get('/offices', [App\Http\Controllers\admin\OfficeController::class, 'index']);
+    Route::get('/offices/create', [App\Http\Controllers\admin\OfficeController::class, 'create']);
+    Route::post('/offices/store', [App\Http\Controllers\admin\OfficeController::class, 'store']);
+    Route::get('/offices/edit/{offices}', [App\Http\Controllers\admin\OfficeController::class, 'edit']);
+    Route::put('/offices/update/{offices}', [App\Http\Controllers\admin\OfficeController::class, 'update']);
+    Route::delete('/offices/destroy/{offices}', [App\Http\Controllers\admin\OfficeController::class, 'destroy']);
 
     // Campaigns
     Route::resource('/compain', App\Http\Controllers\admin\CompainController::class);
@@ -208,7 +207,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'role']], function()
 
 });
 
-Route::group(['middleware' => ['auth', 'checkStatus']], function() {
+Route::group(['middleware' => ['auth', 'checkStatus']], function () {
     //Dashboard
     Route::get('/', [App\Http\Controllers\HomeController::class, 'index']);
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index']);
@@ -219,7 +218,7 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function() {
     Route::put('/profile/password', [App\Http\Controllers\ProfileController::class, 'password']);
     Route::put('/user/password/{$user}', [App\Http\Controllers\outer\UserController::class, 'userpassword']);
 
-    Route::group(['middleware' => ['not_role_10']], function()  // Role 10 Only Compain User
+    Route::group(['middleware' => ['not_role_10']], function ()  // Role 10 Only Compain User
     {
 
         // Inventory
@@ -236,8 +235,8 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function() {
         Route::get('inventory/edit/{product}', [App\Http\Controllers\ProductController::class, 'edit']);
         Route::put('inventory/update/{product}', [App\Http\Controllers\ProductController::class, 'update']);
 
-        Route::post('load/types' , [App\Http\Controllers\ProductController::class, 'loadTypes']); // Load Subcategories with Ajax
-        Route::post('load/subtypes' , [App\Http\Controllers\ProductController::class, 'loadSubTypes']); // Load Subcategories with Ajax
+        Route::post('load/types', [App\Http\Controllers\ProductController::class, 'loadTypes']); // Load Subcategories with Ajax
+        Route::post('load/subtypes', [App\Http\Controllers\ProductController::class, 'loadSubTypes']); // Load Subcategories with Ajax
 
         Route::get('discountprice', [App\Http\Controllers\ProductController::class, 'showdiscount']);
         Route::get('discount/edit/{id}', [App\Http\Controllers\ProductController::class, 'discountEdit']);
@@ -245,7 +244,7 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function() {
         Route::post('get-inventory-orders', [App\Http\Controllers\ProductController::class, 'get_orders']);
 
 
-        Route::group(['middleware' => ['not_role_11']], function() // Role 11 Dealer User
+        Route::group(['middleware' => ['not_role_11']], function () // Role 11 Dealer User
         {
             // Clients
             Route::resource('/clients', App\Http\Controllers\ClientsController::class);
@@ -289,7 +288,7 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function() {
             Route::delete('/lead/delete/permanently/{leads}', [App\Http\Controllers\LeadsController::class, 'lead_delete_permanently']);
             Route::get('tarsh/leads-search', [App\Http\Controllers\LeadsController::class, 'trash_search']);
 
-            Route::post('lead/feedback/store',[App\Http\Controllers\LeadsController::class,'storeFeedback'])->name('lead.feedback.store');
+            Route::post('lead/feedback/store', [App\Http\Controllers\LeadsController::class, 'storeFeedback'])->name('lead.feedback.store');
 
             Route::get('markasread/{id}', [App\Http\Controllers\LeadsController::class, 'markAsRead']);
             Route::get('markas/all_as/read', [App\Http\Controllers\LeadsController::class, 'markAllAsRead']);
@@ -354,16 +353,14 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function() {
             Route::post('file-import', [App\Http\Controllers\admin\FileController::class, 'fileImport'])->name('file-import');
             Route::get('file-export', [App\Http\Controllers\admin\FileController::class, 'fileExport'])->name('file-export');
             Route::get('check-status', [App\Http\Controllers\ProductController::class, 'checkstatus']);
-             Route::get('office-users-get/{office_id}', [App\Http\Controllers\LeadsController::class, 'office_users_get']);
+            Route::get('office-users-get/{office_id}', [App\Http\Controllers\LeadsController::class, 'office_users_get']);
 
             Route::get('client-leads-import', [App\Http\Controllers\FacebookController::class, 'clientsImport']);
             Route::post('client-leads-store', [App\Http\Controllers\FacebookController::class, 'clientfileImportInstantForm']);
-
-
         });
 
 
-        Route::group(['middleware' => ['not_role_11' , 'not_role_12']], function() // Role 12 Freelancer User && Role 11 Dealer User
+        Route::group(['middleware' => ['not_role_11', 'not_role_12']], function () // Role 12 Freelancer User && Role 11 Dealer User
         {
             Route::get('facebookleads', [App\Http\Controllers\FacebookApiController::class, 'facebookleads']);
             Route::get('/user/create', [App\Http\Controllers\UserController::class, 'create']);
@@ -433,14 +430,14 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function() {
             Route::post('multi/affiliators/delete/permanently', [App\Http\Controllers\AffiliatorsController::class, 'multiAffiliatorsDeletePermanently']);
             Route::post('/leads/multi-trash', [App\Http\Controllers\LeadsController::class, 'multiTrashLeads'])->name('leads.multi-trash');
 
-	        // reports
+            // reports
             Route::get('reports/', [App\Http\Controllers\ReportController::class, 'reports']);
             Route::get('user/reports', [App\Http\Controllers\ReportController::class, 'userreports']);
             Route::get('report_info/{id}/{task}/{subtype}', [App\Http\Controllers\ReportController::class, 'report_info']);
             Route::get('report_info/{report_of}/{id}/{task}/{subtype}', [App\Http\Controllers\ReportController::class, 'affiliators_report_info']);
 
             // Staff
-            Route::get('/staff', [App\Http\Controllers\UserController::class, 'staff']);
+            Route::get('manage-staff', [App\Http\Controllers\UserController::class, 'staff'])->name('view.staff');
             Route::get('/inactive-staff', [App\Http\Controllers\UserController::class, 'inactiveStaff']);
             Route::post('/user/search', [App\Http\Controllers\UserController::class, 'search']);
             Route::get('/contacts', [App\Http\Controllers\UserController::class, 'teams']);
@@ -502,20 +499,15 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function() {
             Route::get('edit/target/{target}', [App\Http\Controllers\UserController::class, 'edit_target']);
             Route::post('update-target/{target}', [App\Http\Controllers\UserController::class, 'update_target']);
             Route::get('target-search', [App\Http\Controllers\UserController::class, 'target_search']);
-
         });
-
-
     });
 
-    Route::group([ 'middleware' => ['role10']], function()
-    {
+    Route::group(['middleware' => ['role10']], function () {
         // Show Only Campains
         Route::resource('/compain', App\Http\Controllers\CompainController::class);
         Route::get('/compain/inactive/{id}', [App\Http\Controllers\CompainController::class, 'compainInActive']);
         Route::get('/compain/active/{id}', [App\Http\Controllers\CompainController::class, 'compainActive']);
     });
-
 });
 
 

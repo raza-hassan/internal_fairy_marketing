@@ -471,7 +471,7 @@
 
 
                                 @if(Auth::user()->can('staff.view'))
-                                    <p><a href="{{url('staff')}}" class="add-leads-bell bottom-icon">Staff</a></p>
+                                    <p><a href="{{route('view.staff')}}" class="add-leads-bell bottom-icon">Staff</a></p>
                                 @endif
 
 
