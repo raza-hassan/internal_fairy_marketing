@@ -220,7 +220,6 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function () {
 
     Route::group(['middleware' => ['not_role_10']], function ()  // Role 10 Only Compain User
     {
-
         // Inventory
         Route::resource('inventory', App\Http\Controllers\ProductController::class);
         Route::get('inventory-search', [App\Http\Controllers\ProductController::class, 'search']);
