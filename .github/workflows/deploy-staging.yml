@@ -1,0 +1,24 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ~/www/staging.fairymarketing.com/public_html
+            git pull origin dev
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan view:clear
