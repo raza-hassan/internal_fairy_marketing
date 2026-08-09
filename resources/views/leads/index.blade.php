@@ -41,7 +41,7 @@
         <header class="header--dashboard">
 
             <div class="header__left">
-                <h3>Leads - Hassan1233 again - ({{$leads->total()}})</h3>
+                <h3>Leads - Hassan again - ({{$leads->total()}})</h3>
             </div>
             <div class="header__center">
 
