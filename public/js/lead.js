@@ -1584,3 +1584,45 @@ function affiliatorsPermanentlyDeleteConfirm(event) {
         document.getElementById('multiDeleteAffilatorsForm').submit(); // Submit the form if confirmed
     }
 }
+
+    $(document).on('click', '#leadFeedBackBtn', function () {
+        var lead_id = $(this).attr('data-lead_id');
+        $('#feedback_lead_id').val(lead_id);
+    });
+
+    $(document).on('submit', '#feedback_lead_from', function(e) {
+
+        // Already submitted?
+        if ($(this).data('submitted')) {
+            e.preventDefault();
+            return false;
+        }
+
+        // Mark as submitted
+        $(this).data('submitted', true);
+
+        // Disable button and show loader
+        $('.submit_feedBack')
+            .prop('disabled', true)
+            .html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+
+        return true;
+    });
+
+    function toggleAmountField() {
+        let status = $('#feedback_status').val();
+
+        if (status == 'sale-closed') {
+            $('#amount_div').show();
+            $('#feedback_amount').prop('required', true);
+        } else {
+            $('#amount_div').hide();
+            $('#feedback_amount').prop('required', false).val('');
+        }
+    }
+
+    // toggleAmountField(); // page load
+
+    $('#feedback_status').on('change', function () {
+        toggleAmountField();
+    });
