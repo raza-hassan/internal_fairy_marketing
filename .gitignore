@@ -1,6 +1,6 @@
 *.log
 .DS_Store
- /public/google-app-credentials.json
+/public/google-app-credentials.json
 .env
 .env.dev
 .env.backup
@@ -33,3 +33,4 @@ Thumbs.db
 .history
 .lh
 /assets
+yarn-error.log
