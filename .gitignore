@@ -34,3 +34,7 @@ Thumbs.db
 .lh
 /assets
 yarn-error.log
+index.php
+.htaccess
+# composer.json
+# composer.lock
