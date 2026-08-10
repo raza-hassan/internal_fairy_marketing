@@ -1956,7 +1956,7 @@ class AffiliatorsController extends Controller {
 
                 $data = array(
                     'type' => 'Affiliator Shared',
-                    'msg_body' => base64_encode('Affiliator "' . $affiliator->name . '" Has Been Shared With You By ' . $shared_by->name . ' ID : <a href="'.url("/affiliators/$affiliator->id/edit/").'">'.$affiliator->id.'</a>'),
+                    'msg_body' => base64_encode('Affiliator "' . $affiliator->name . '" Has Been Shared With  ' . $user->name . ' By ' . $shared_by->name . ' ID : <a href="'.url("/affiliators/$affiliator->id/edit/").'">'.$affiliator->id.'</a>'),
                     'created_by' => $shared_by->id,
                     'show_to' => $user->id,
                     'show_to_role' => 0,

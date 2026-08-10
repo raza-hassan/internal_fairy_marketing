@@ -36,7 +36,69 @@ class Helper
         return ;
     }
 
+    public static function decodeNotificationBody($msgBody)
+    {
+        $decoded = base64_decode($msgBody, true);
 
+        if ($decoded !== false && base64_encode($decoded) === $msgBody) {
+            return $decoded;
+        }
+
+        return $msgBody;
+    }
+
+    public static function notificationsForCurrentUser($limit = 50)
+    {
+        $user = Auth::user();
+        $isPrivileged = in_array($user->role, [1, 5, 13, 14]);
+
+        if ($isPrivileged) {
+            $scope = function ($query) use ($user) {
+                $query->where('show_to_role', $user->role)
+                    ->orWhere('show_to', $user->id);
+            };
+
+            $unread = Notification::whereNull('role_read_at')
+                ->whereNull('read_by_role')
+                ->where($scope)
+                ->orderBy('id', 'desc')
+                ->limit($limit)
+                ->get();
+
+            $remaining = $limit - $unread->count();
+
+            $read = $remaining > 0
+                ? Notification::whereNotNull('role_read_at')
+                    ->whereNotNull('read_by_role')
+                    ->where($scope)
+                    ->orderBy('id', 'desc')
+                    ->limit($remaining)
+                    ->get()
+                : collect();
+        } else {
+            $unread = Notification::where('show_to', $user->id)
+                ->whereNull('user_read_at')
+                ->whereNull('read_by_user')
+                ->orderBy('id', 'desc')
+                ->limit($limit)
+                ->get();
+
+            $remaining = $limit - $unread->count();
+
+            $read = $remaining > 0
+                ? Notification::where('show_to', $user->id)
+                    ->orderBy('id', 'desc')
+                    ->limit($remaining)
+                    ->get()
+                : collect();
+        }
+
+        return [
+            'isPrivileged' => $isPrivileged,
+            'count' => $unread->count(),
+            'notifications' => $unread->concat($read),
+        ];
+    }
 
     public static function meetings()
     {
