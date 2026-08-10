@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  deploy-staging:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Staging
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_SSH_HOST }}
+          username: ${{ secrets.STAGING_SSH_USER }}
+          key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.STAGING_SSH_PORT }}
+          script: |
+            cd ~/www/staging.fairymarketing.com/public_html
+            git pull origin dev
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan view:clear
+
+  deploy-live:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Live
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LIVE_SSH_HOST }}
+          username: ${{ secrets.LIVE_SSH_USER }}
+          key: ${{ secrets.LIVE_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.LIVE_SSH_PORT }}
+          script: |
+            cd /path/to/live/project
+            git pull origin main
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan view:clear
