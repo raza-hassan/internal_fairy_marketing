@@ -9,7 +9,7 @@
         <header class="header--dashboard">
 
             <div class="header__left">
-                <h3>Notifications11111111111 ({{count($notifications)}})</h3>
+                <h3>Notifications111111111111 ({{count($notifications)}})</h3>
             </div>
 
         </header>
