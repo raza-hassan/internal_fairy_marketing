@@ -15,6 +15,101 @@
         </header>
 
 
+         <header class="header--dashboard">
+
+            <div class="header__left">
+                <h3>Notifications ({{count($notifications)}})</h3>
+            </div>
+
+        </header>
+
+
+
+         <header class="header--dashboard">
+
+            <div class="header__left">
+                <h3>Notifications ({{count($notifications)}})</h3>
+            </div>
+
+        </header>
+
+
+
+         <header class="header--dashboard">
+
+            <div class="header__left">
+                <h3>Notifications ({{count($notifications)}})</h3>
+            </div>
+
+        </header>
+
+
+
+
+         <header class="header--dashboard">
+
+            <div class="header__left">
+                <h3>Notifications ({{count($notifications)}})</h3>
+            </div>
+
+        </header>
+
+
+
+
+         <header class="header--dashboard">
+
+            <div class="header__left">
+                <h3>Notifications ({{count($notifications)}})</h3>
+            </div>
+
+        </header>
+
+
+
+         <header class="header--dashboard">
+
+            <div class="header__left">
+                <h3>Notifications ({{count($notifications)}})</h3>
+            </div>
+
+        </header>
+
+
+
+         <header class="header--dashboard">
+
+            <div class="header__left">
+                <h3>Notifications ({{count($notifications)}})</h3>
+            </div>
+
+        </header>
+
+
+
+
+         <header class="header--dashboard">
+
+            <div class="header__left">
+                <h3>Notifications ({{count($notifications)}})</h3>
+            </div>
+
+        </header>
+
+
+
+         <header class="header--dashboard">
+
+            <div class="header__left">
+                <h3>Notifications ({{count($notifications)}})</h3>
+            </div>
+
+        </header>
+
+
+
+
+
         <div class="main-container" id="remove_card" >
             <div class="cards" >
 
