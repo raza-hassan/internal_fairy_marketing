@@ -612,4 +612,3 @@ Route::get('corner/product/prices', [App\Http\Controllers\Controller::class, 'up
 
 // //Facebook leads Api
 // Route::get('facebook_access_token', [App\Http\Controllers\FacebookApiController::class, 'access_token']);
-// asjasfjasj
