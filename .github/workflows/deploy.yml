@@ -15,7 +15,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.FAIRY_SSH_HOST }}
-          username: ${{ secrets.FAIRY_SSH_USER }}
+          username: ${{ secrets.FAIRY_SSH_USERNAME }}
           key: ${{ secrets.FAIRY_SSH_PRIVATE_KEY }}
           port: ${{ secrets.FAIRY_SSH_PORT }}
           script: |
@@ -33,7 +33,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.FAIRY_SSH_HOST }}
-          username: ${{ secrets.FAIRY_SSH_USER }}
+          username: ${{ secrets.FAIRY_SSH_USERNAME }}
           key: ${{ secrets.FAIRY_SSH_PRIVATE_KEY }}
           port: ${{ secrets.FAIRY_SSH_PORT }}
           script: |
