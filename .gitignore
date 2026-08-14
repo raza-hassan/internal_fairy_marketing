@@ -22,7 +22,6 @@ npm-debug.log
 /storage/*.key
 /storage/pail
 /vendor
-/complete-Backup-14-Aug-2026.zip
 Homestead.json
 Homestead.yaml
 Thumbs.db
@@ -32,9 +31,5 @@ Thumbs.db
 .lh
 /assets
 yarn-error.log
-/index.php
-/.htaccess
-# composer.json
-# composer.lock
 /bootstrap/cache/*.php
 !bootstrap/cache/.gitkeep

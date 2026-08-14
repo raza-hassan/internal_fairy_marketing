@@ -36,5 +36,11 @@ jobs:
           username: ${{ secrets.FAIRY_SSH_USERNAME }}
           key: ${{ secrets.FAIRY_SSH_PRIVATE_KEY }}
           port: ${{ secrets.FAIRY_SSH_PORT }}
+          # script: |
+          #   echo "Live server not set up yet — skipping deploy. See runbook Phase 2 to set up the live server, then replace this script with the real path."
           script: |
-            echo "Live server not set up yet — skipping deploy. See runbook Phase 2 to set up the live server, then replace this script with the real path."
+            cd ~/www/internal.fairymarketing.com/public_html
+            git pull origin main
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan view:clear
