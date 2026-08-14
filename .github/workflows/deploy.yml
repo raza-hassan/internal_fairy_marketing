@@ -14,10 +14,10 @@ jobs:
       - name: Deploy to Staging
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.STAGING_SSH_HOST }}
-          username: ${{ secrets.STAGING_SSH_USER }}
-          key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.STAGING_SSH_PORT }}
+          host: ${{ secrets.FAIRY_SSH_HOST }}
+          username: ${{ secrets.FAIRY_SSH_USERNAME }}
+          key: ${{ secrets.FAIRY_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.FAIRY_SSH_PORT }}
           script: |
             cd ~/www/staging.fairymarketing.com/public_html
             git pull origin dev
@@ -32,9 +32,9 @@ jobs:
       - name: Deploy to Live
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.LIVE_SSH_HOST }}
-          username: ${{ secrets.LIVE_SSH_USER }}
-          key: ${{ secrets.LIVE_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.LIVE_SSH_PORT }}
+          host: ${{ secrets.FAIRY_SSH_HOST }}
+          username: ${{ secrets.FAIRY_SSH_USERNAME }}
+          key: ${{ secrets.FAIRY_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.FAIRY_SSH_PORT }}
           script: |
             echo "Live server not set up yet — skipping deploy. See runbook Phase 2 to set up the live server, then replace this script with the real path."
