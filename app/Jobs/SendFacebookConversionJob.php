@@ -9,8 +9,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\LeadFeedback;
+use App\Models\FeedbackLog;
 use App\Services\FacebookConversionService;
-use Illuminate\Support\Facades\Log;
 
 class SendFacebookConversionJob implements ShouldQueue
 {
@@ -44,26 +44,33 @@ class SendFacebookConversionJob implements ShouldQueue
                 $lead
             );
 
-            if ($response->successful()) {
+            $body = $response->json();
+            $eventsReceived = $body['events_received'] ?? null;
+            $success = $response->successful() && $eventsReceived > 0;
+
+            FeedbackLog::create([
+                'lead_feedback_id' => $this->feedback->id,
+                'lead_id' => $lead->id,
+                'event_name' => $eventName,
+                'success' => $success,
+                'http_status' => $response->status(),
+                'events_received' => $eventsReceived,
+                'response' => $body,
+            ]);
+
+            if ($success) {
                 $this->feedback->update([
                     'facebook_synced' => true,
                     'facebook_synced_at' => now()
                 ]);
-            } else {
-                Log::error('Facebook conversion event rejected', [
-                    'feedback_id' => $this->feedback->id,
-                    'lead_id' => $lead->id,
-                    'event_name' => $eventName,
-                    'http_status' => $response->status(),
-                    'body' => $response->json(),
-                ]);
             }
         } catch (\Throwable $e) {
-            Log::error('Facebook conversion job failed', [
-                'feedback_id' => $this->feedback->id,
+            FeedbackLog::create([
+                'lead_feedback_id' => $this->feedback->id,
                 'lead_id' => $lead->id,
                 'event_name' => $eventName,
-                'message' => $e->getMessage(),
+                'success' => false,
+                'error_message' => $e->getMessage(),
             ]);
         }
     }
