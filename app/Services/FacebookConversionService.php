@@ -78,7 +78,7 @@ class FacebookConversionService
                         ] : null,
 
                         'em' => !empty($lead->client?->email)
-                            ? [hash('sha256', strtolower(trim($lead->client->email)))]
+                            ? [hash('sha256', strtolower(trim($lead->client?->email)))]
                             : null,
 
                         'ph' => !empty($phone)
