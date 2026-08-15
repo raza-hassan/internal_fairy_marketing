@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\LeadFeedback;
+use App\Models\FeedbackLog;
 use App\Services\FacebookConversionService;
 
 class SendFacebookConversionJob implements ShouldQueue
@@ -28,8 +29,6 @@ class SendFacebookConversionJob implements ShouldQueue
         $lead = $this->feedback->lead;
         $status = $this->feedback->status;
 
-        // $events = \App\Enums\LeadFeedbackStatus::cases();
-
         if (!$status->shouldSyncToFacebook()) {
             return;
         }
@@ -39,22 +38,39 @@ class SendFacebookConversionJob implements ShouldQueue
             return;
         }
 
-        $response = $facebookFeedback->send(
-            $eventName,
-            $lead
-        );
+        try {
+            $response = $facebookFeedback->send(
+                $eventName,
+                $lead
+            );
 
+            $body = $response->json();
+            $eventsReceived = $body['events_received'] ?? null;
+            $success = $response->successful() && $eventsReceived > 0;
 
-        // dd([
-        //     'status' => $response->status(),
-        //     'body' => $response->json(),
-        // ]);
+            FeedbackLog::create([
+                'lead_feedback_id' => $this->feedback->id,
+                'lead_id' => $lead->id,
+                'event_name' => $eventName,
+                'success' => $success,
+                'http_status' => $response->status(),
+                'events_received' => $eventsReceived,
+                'response' => $body,
+            ]);
 
-        if ($response->successful()) {
-
-            $this->feedback->update([
-                'facebook_synced' => true,
-                'facebook_synced_at' => now()
+            if ($success) {
+                $this->feedback->update([
+                    'facebook_synced' => true,
+                    'facebook_synced_at' => now()
+                ]);
+            }
+        } catch (\Throwable $e) {
+            FeedbackLog::create([
+                'lead_feedback_id' => $this->feedback->id,
+                'lead_id' => $lead->id,
+                'event_name' => $eventName,
+                'success' => false,
+                'error_message' => $e->getMessage(),
             ]);
         }
     }
