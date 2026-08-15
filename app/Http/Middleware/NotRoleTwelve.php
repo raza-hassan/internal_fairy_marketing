@@ -8,7 +8,7 @@ class NotRoleTwelve
     public function handle($request, Closure $next)
     {
 
-        if(Auth::user()->role != 12 )
+        if(!Auth::user()->hasRole('Freelancer'))
         {
             return $next($request);
         }

@@ -8,7 +8,7 @@
                     <li><a href="{{ url('dealors')}} "><i class="fa-solid fa-people-group"></i>Dealers</a></li>
                     <li><a href="{{ url('freeliencer') }}"><i class="icon-users2"></i>Freelancers</a></li>
                     <li><a href="{{ url('affiliator/todos') }}"><i class="fa fa-list" aria-hidden="true"></i>Todos</a></li>
-                    @if(Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                    @if(Auth::user()->can('affiliator.data.all'))
                     <!--<li><a href="{{url('inactive-affiliators')}}"><i class="fa fa-user-o" aria-hidden="true"></i><span>Inactive Affiliators</span></a></li>-->
                     <!--<li><a href="{{url('overdue-affiliator-task')}}"><i class="fa fa-clock" aria-hidden="true"></i><span>Overdue Tasks</span></a></li>-->
                     @endif

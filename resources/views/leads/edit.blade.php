@@ -53,7 +53,7 @@
                                 <div class="form-group">
                                     <label>Name<sup>*</sup>
                                     </label>
-                                    <input class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" name="name" id="input-name" type="text" placeholder="{{ __('Name') }}" value="{{ old('name',$lead->client->name) }}"  @if(Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14) readonly @endif/>
+                                    <input class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" name="name" id="input-name" type="text" placeholder="{{ __('Name') }}" value="{{ old('name',$lead->client->name) }}"  @if(!Auth::user()->can('lead.data.all')) readonly @endif/>
                                     @if ($errors->has('name'))
                                     <span id="name-error" class="error text-danger" for="input-name">{{ $errors->first('name') }}</span>
                                     @endif
@@ -61,7 +61,7 @@
                                 <div class="form-group">
                                     <label>Email<sup>*</sup>
                                     </label>
-                                    <input class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" id="input-email" type="email" placeholder="{{ __('Email') }}" value="{{ old('email',$lead->client->email) }}"  @if(Auth::user()->role != 1  && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14) readonly @endif />
+                                    <input class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" id="input-email" type="email" placeholder="{{ __('Email') }}" value="{{ old('email',$lead->client->email) }}"  @if(!Auth::user()->can('lead.data.all')) readonly @endif />
                                     @if ($errors->has('email'))
                                     <span id="email-error" class="error text-danger" for="input-email">{{ $errors->first('email') }}</span>
                                     @endif
@@ -69,7 +69,7 @@
                                 {{-- <div class="form-group">
                                     <label>Mobile
                                     </label>
-                                    <input class="form-control" type="text" placeholder="Enter Mobile" name="phone" value="{{ old('phone',$lead->client->phone) }}"  @if(Auth::user()->role != 1) readonly @endif/>
+                                    <input class="form-control" type="text" placeholder="Enter Mobile" name="phone" value="{{ old('phone',$lead->client->phone) }}"  @if(!Auth::user()->can('lead.data.all')) readonly @endif/>
                                 </div> --}}
 
 
@@ -89,7 +89,7 @@
                     <label>Mobile Phone<sup>*</sup></label>
                     <div class="col-sm-11" >
                         <div class="form-group mb-0" >
-                            <input <?php if (Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14){ ?> readonly <?php } ?> class="form-control phone search_number" maxlength="15"  name="phone"  id="leadphone" type="text" required="" client-id="{{ $lead->client_id }}" value="{{ old('phone',$lead->client->phone) }}" />
+                            <input <?php if (!Auth::user()->can('lead.data.all')){ ?> readonly <?php } ?> class="form-control phone search_number" maxlength="15"  name="phone"  id="leadphone" type="text" required="" client-id="{{ $lead->client_id }}" value="{{ old('phone',$lead->client->phone) }}" />
                             <span id="error-msg" class="hide"></span>
                             <p id="result"></p>
                         </div>
@@ -107,7 +107,7 @@
                     <label>Ptcl<sup>*</sup></label>
                     <div class="col-sm-11 ">
                         <div class="form-group mb-0">
-                            <input <?php if (Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14){ ?> readonly="" <?php } ?> class="form-control ptclphone search_number" name="ptclphone" placeholder="Ptcl Phone Number"  id="leadptcl" type="text" required="" client-id="{{ $lead->client_id }}" value="{{ old('ptclphone',$lead->client->phone) }}" />
+                            <input <?php if (!Auth::user()->can('lead.data.all')){ ?> readonly="" <?php } ?> class="form-control ptclphone search_number" name="ptclphone" placeholder="Ptcl Phone Number"  id="leadptcl" type="text" required="" client-id="{{ $lead->client_id }}" value="{{ old('ptclphone',$lead->client->phone) }}" />
                         </div>
                     </div>
                     <div class="col-sm-1 form-group" >
@@ -133,11 +133,11 @@
 
                             <div class="row">
                                 <div class="col-11 mb-2">
-                                    <input type="text" maxlength="15" required="true" name="edit_international_phone_dynamic[]" class="form-control search_edit_international_multiphone_number" placeholder="301 2345678" id="search_edit_international_number{{ $key+1 }}" counter="{{ $key+1 }}" client_id={{ $lead->client_id }} @if (Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) style="width: 100%; padding-left: 83px;" @else style="width: 68%;"  @endif value="{{ $record->number }}"  <?php if (Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14){ ?>  readonly <?php } ?> >
+                                    <input type="text" maxlength="15" required="true" name="edit_international_phone_dynamic[]" class="form-control search_edit_international_multiphone_number" placeholder="301 2345678" id="search_edit_international_number{{ $key+1 }}" counter="{{ $key+1 }}" client_id={{ $lead->client_id }} @if (Auth::user()->can('lead.data.all')) style="width: 100%; padding-left: 83px;" @else style="width: 68%;"  @endif value="{{ $record->number }}"  <?php if (!Auth::user()->can('lead.data.all')){ ?>  readonly <?php } ?> >
                                     <input type="hidden" name="edit_phone_number_ids[{{$key+1}}]" value="{{ $record->id }}"/>
                                 </div>
 
-                                @if (Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                                @if (Auth::user()->can('lead.data.all'))
                                     <div class="col-sm-1 pt-2">
                                         <button type="button" class="btn remove-edit-international-input-field" id="remove-edit-international-input-field-{{ $key+1 }}" client_id={{ $lead->client_id }} number_id="{{ $record->id }}"><i class="fa fa-trash fa-2x fa-solid" aria-hidden="true"></i></button>
                                     </div>
@@ -171,7 +171,7 @@
                             <div class="ps-block__content">
                                 <div class="form-group">
                                     <label>Select Project</label>
-                                    <select class="form-control" title="Status" name="project_id" @if(Auth::user()->role != 1) disabled @endif>
+                                    <select class="form-control" title="Status" name="project_id" @if(!Auth::user()->can('lead.data.all')) disabled @endif>
                                         <option value="0">Select Item</option>
                                         @if(!empty($projects))
                                         @foreach($projects as $project)
@@ -183,7 +183,7 @@
                                 <div class="form-group">
                                     <label>Interested In
                                     </label>
-                                    <select class="ps-select form-control" title="Status" name="category_id" @if(Auth::user()->role != 1) disabled @endif>
+                                    <select class="ps-select form-control" title="Status" name="category_id" @if(!Auth::user()->can('lead.data.all')) disabled @endif>
                                         <option value="0">Select Item</option>
                                         @if(!empty($categories))
                                         @foreach($categories as $category)
@@ -195,7 +195,7 @@
                                 <div class="form-group">
                                     <label>Assign To
                                     </label>
-                                    <select class="ps-select form-control" title="Status" name="user_id" required="true" aria-required="true" @if(Auth::user()->role != 1) disabled @endif>
+                                    <select class="ps-select form-control" title="Status" name="user_id" required="true" aria-required="true" @if(!Auth::user()->can('lead.data.all')) disabled @endif>
                                         <option value="0">Select Agent</option>
                                         @if(!empty($agents))
                                         @foreach($agents as $user)
@@ -207,7 +207,7 @@
                                <div class="form-group">
                                     <label>Lead Priority
                                     </label>
-                                    <select class="ps-select form-control" title="Status" name="priority" @if(Auth::user()->role != 1) disabled @endif>
+                                    <select class="ps-select form-control" title="Status" name="priority" @if(!Auth::user()->can('lead.data.all')) disabled @endif>
                                         <option value="0">Choose Priority</option>
                                         @if(!empty($priority))
                                         @foreach($priority as $priorityy)
@@ -219,7 +219,7 @@
                                <div class="form-group">
                                     <label>Lead Status
                                     </label>
-                                    <select class="ps-select form-control" title="Status" name="status_id" @if(Auth::user()->role != 1) disabled @endif>
+                                    <select class="ps-select form-control" title="Status" name="status_id" @if(!Auth::user()->can('lead.data.all')) disabled @endif>
                                         <option value="0">Choose Status</option>
                                         @if(!empty($lead_status))
                                         @foreach($lead_status as $lead_status)
@@ -245,7 +245,7 @@
                                 </div>
 
 
-                                @if(Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                                @if(Auth::user()->can('lead.data.all'))
                                     @if($task)
                                         <div class="form-group">
                                             <label>Inventory Booked</label>
@@ -287,7 +287,7 @@
                 </div>
             </div>
             <div class="ps-form__bottom">
-                @if(Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                @if(Auth::user()->can('lead.data.all'))
                     <a class="ps-btn ps-btn--black" href="{{url('all/leads/'.$lead->user_id)}}">Go Back >></a>
                 @endif
                 <a class="ps-btn ps-btn--black" href="{{url('leads')}}">Cancel</a>

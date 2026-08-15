@@ -78,6 +78,54 @@ class User extends Authenticatable //implements MustVerifyEmail {
     public function childs() {
         return $this->hasMany('App\Models\User', 'parent', 'id');
     }
+
+    /**
+     * This user's id plus every descendant's id, walked down the `parent`
+     * self-reference level by level (not just direct reports). Depth is
+     * capped only as a guard against a corrupt/cyclic parent chain.
+     *
+     * @return int[]
+     */
+    public function subordinateIds(): array
+    {
+        $ids = [$this->id];
+        $frontier = [$this->id];
+
+        for ($depth = 0; $depth < 25 && !empty($frontier); $depth++) {
+            $children = self::whereIn('parent', $frontier)->pluck('id')->diff($ids)->values()->all();
+            if (empty($children)) {
+                break;
+            }
+            $ids = array_merge($ids, $children);
+            $frontier = $children;
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Resolves which user ids this user is allowed to see data for, within
+     * a given permission module (e.g. 'lead', 'client', 'affiliator',
+     * 'staff', 'target'), based on the "{module}.data.all" / "{module}.data.own"
+     * permissions. Returns null when there is no restriction (show everything).
+     *
+     * @return int[]|null
+     */
+    public function visibleUserIds(string $module): ?array
+    {
+        if ($this->can("{$module}.data.all")) {
+            return null;
+        }
+        if ($this->can("{$module}.data.own")) {
+            return $this->subordinateIds();
+        }
+        return [$this->id];
+    }
+
+    public function canSeeAllData(string $module): bool
+    {
+        return $this->can("{$module}.data.all");
+    }
     /**
      * Send the password reset notification.
      *

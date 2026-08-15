@@ -84,7 +84,7 @@
 
 
 
-                        @if(Auth::user()->role==5 || Auth::user()->role==13 || Auth::user()->role==14)
+                        @if(Auth::user()->can('staff.data.all'))
 
                             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
 

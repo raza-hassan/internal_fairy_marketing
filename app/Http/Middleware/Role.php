@@ -8,7 +8,7 @@ class Role {
     if (!Auth::check())     // This isnt necessary, it should be part of your 'auth' middleware
       return redirect('/');
     $user = Auth::user();
-    if($user->role == 0 || $user->role == 1)
+    if($user->role == 0 || $user->hasRole('Manager'))
       return $next($request);
     return redirect('/');
   }

@@ -214,7 +214,7 @@
 
                             <div class="ps-block__content">
 
-                                @if(Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                                @if(Auth::user()->can('staff.data.all'))
 
                                     <div class="form-group">
 
@@ -403,7 +403,7 @@
 
                                 </div>
 
-                                @if(Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                                @if(Auth::user()->can('staff.data.all'))
 
                                     <div class="form-group">
                                         <label>Status</label>

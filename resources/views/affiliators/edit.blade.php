@@ -32,7 +32,7 @@
             @method('put')
             <?php
                 $phone_read = '';
-                if (Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+                if (Auth::user()->can('affiliator.data.all')) {
                     // echo 'if'; exit;
                     $phone_read = "";
                 }else if($affiliator->status != 1){
@@ -217,7 +217,7 @@
                                     <label>Mobile Phone<sup>*</sup></label>
                                     <div class="col-sm-11" >
                                         <div class="form-group mb-0" >
-                                            <input class="form-control phone search_number" maxlength="15"  name="phone"  client-id="{{ $affiliator->id }}" id="leadphone" type="text" required=""  value="{{ old('phone',$affiliator->phone) }}" @if(Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14) readonly @endif />
+                                            <input class="form-control phone search_number" maxlength="15"  name="phone"  client-id="{{ $affiliator->id }}" id="leadphone" type="text" required=""  value="{{ old('phone',$affiliator->phone) }}" @if(!Auth::user()->can('affiliator.data.all')) readonly @endif />
                                             <span id="error-msg" class="hide"></span>
                                             <p id="result"></p>
                                         </div>
@@ -235,7 +235,7 @@
                                     <label>Ptcl<sup>*</sup></label>
                                     <div class="col-sm-11 ">
                                         <div class="form-group mb-0">
-                                            <input <?php if (Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14 ){ ?> readonly="" <?php } ?> class="form-control ptclphone search_number" name="ptclphone" client-id="{{ $affiliator->id }}" placeholder="Ptcl Phone Number"  id="leadptcl" type="text" required=""  value="{{ old('ptclphone') }}" />
+                                            <input <?php if (!Auth::user()->can('affiliator.data.all') ){ ?> readonly="" <?php } ?> class="form-control ptclphone search_number" name="ptclphone" client-id="{{ $affiliator->id }}" placeholder="Ptcl Phone Number"  id="leadptcl" type="text" required=""  value="{{ old('ptclphone') }}" />
                                         </div>
                                     </div>
                                     <div class="col-sm-1 form-group" >
@@ -260,11 +260,11 @@
 
                                             <div class="row">
                                                 <div class="col-11 mb-2">
-                                                    <input type="text" maxlength="15" required="true" name="edit_international_phone_dynamic[]" class="form-control search_edit_international_multiphone_number" placeholder="301 2345678" id="search_edit_international_number{{ $key+1 }}" counter="{{ $key+1 }}" client_id={{ $affiliator->id }} @if (Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) style="width: 100%; padding-left: 83px;" @else style="width: 68%;"  @endif value="{{ $record->number }}"  <?php if (Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14){ ?>  readonly <?php } ?> >
+                                                    <input type="text" maxlength="15" required="true" name="edit_international_phone_dynamic[]" class="form-control search_edit_international_multiphone_number" placeholder="301 2345678" id="search_edit_international_number{{ $key+1 }}" counter="{{ $key+1 }}" client_id={{ $affiliator->id }} @if (Auth::user()->can('affiliator.data.all')) style="width: 100%; padding-left: 83px;" @else style="width: 68%;"  @endif value="{{ $record->number }}"  <?php if (!Auth::user()->can('affiliator.data.all')){ ?>  readonly <?php } ?> >
                                                     <input type="hidden" name="edit_phone_number_ids[{{$key+1}}]" value="{{ $record->id }}"/>
                                                 </div>
 
-                                                @if (Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                                                @if (Auth::user()->can('affiliator.data.all'))
                                                     <div class="col-sm-1 pt-2">
                                                         <button type="button" class="btn remove-edit-international-input-field" id="remove-edit-international-input-field-{{ $key+1 }}" client_id={{ $affiliator->id }} number_id="{{ $record->id }}"><i class="fa fa-trash fa-2x fa-solid" aria-hidden="true"></i></button>
                                                     </div>
@@ -320,7 +320,7 @@
                                     @endif
                                 </div> --}}
 
-                                @if(Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                                @if(Auth::user()->can('affiliator.data.all'))
                                     <div class="form-group">
                                         @if($affiliator->status == 3)
                                             <div  style="background-color: rgb(147, 252, 147); width:46%; padding:5px; border-radius:20px; margin-bottom:8px;">
@@ -350,7 +350,7 @@
                                             <textarea id="summernote" class="form-control" rows="5" name="note">{{ $affiliator->note }}</textarea>
                                         </div>
 
-                                        @if ($affiliator->status == 0 && Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14)
+                                        @if ($affiliator->status == 0 && !Auth::user()->can('affiliator.data.all'))
 
                                         @else
                                             <div style="margin-top: 10px;">
@@ -367,7 +367,7 @@
                 </div>
             </div>
 
-            @if (($affiliator->status == 2 || $affiliator->status == 0) && Auth::user()->role != 1 && Auth::user()->role != 0 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14)
+            @if (($affiliator->status == 2 || $affiliator->status == 0) && !Auth::user()->can('affiliator.data.all'))
 
                 @if($affiliator->note != '')
                     <div style="background-color: rgb(201, 85, 85); width:max-content; color:white; padding:5px; border-radius:20px; margin-bottom:25px;">

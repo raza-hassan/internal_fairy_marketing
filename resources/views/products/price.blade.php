@@ -254,7 +254,7 @@
                                 <th>Status</th>
                                 <!--<th>Sold By</th>-->
 
-                                @if (Auth::user()->role==1  || Auth::user()->role==5 || Auth::user()->role==13 || Auth::user()->role==14)
+                                @if (Auth::user()->can('inventory.existence.change'))
                                     <th>Existence</th>
                                 @endif
 
@@ -633,7 +633,7 @@
                                     @endif
                                 </td>-->
 
-                                @if (Auth::user()->role==1  || Auth::user()->role==5 || Auth::user()->role==13 || Auth::user()->role==14)
+                                @if (Auth::user()->can('inventory.existence.change'))
                                     <td>
                                         @if($record->status != 'Sold')
                                             <a rel="tooltip" href="#" data-original-title="" title="" data-toggle="modal" data-bind="<?php echo $record->id; ?>"  data-target="#existence_model" id="existence_id">

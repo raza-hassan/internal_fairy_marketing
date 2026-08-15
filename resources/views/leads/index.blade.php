@@ -83,7 +83,7 @@
                                     </div>
                                 </div>
 
-                                @if(Auth::user()->role != 11 && Auth::user()->role != 12 )
+                                @if(!Auth::user()->hasAnyRole(['Dealor', 'Freelancer']))
 
                                     @if(count($users) > 0)
                                         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
@@ -91,7 +91,7 @@
                                                 <label>Allocation </label>
                                                 <div class="bootstrap-select fm-cmp-mg">
                                                     <select class="form-control user_id" name="user_id" id="user_id">
-                                                        @if (Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                                                        @if (Auth::user()->can('lead.data.all'))
                                                             <option value="0">All</option>
                                                         @endif
                                                         <?php
@@ -141,7 +141,7 @@
                                     </div>
                                 @endif
 
-                                @if(Auth::user()->role != 11 && Auth::user()->role != 12 )
+                                @if(!Auth::user()->hasAnyRole(['Dealor', 'Freelancer']))
                                     @if(count($sources) > 0)
                                         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                                             <div class="form-group">
@@ -160,7 +160,7 @@
                                 @endif
 
 
-                                @if(Auth::user()->role==5 || Auth::user()->role==13 || Auth::user()->role==14)
+                                @if(Auth::user()->can('lead.data.all'))
                                     <div class="col-lg-4 col-md-4 col-sm-3 col-xs-12">
                                         <div class="form-group">
                                             <label>Offices </label>

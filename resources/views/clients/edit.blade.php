@@ -127,7 +127,7 @@
                                         <label>Mobile Phone<sup>*</sup></label>
                                         <div class="col-sm-11" >
                                             <div class="form-group mb-0" >
-                                                <input <?php if (Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14 ){ ?> readonly="" <?php } ?> class="form-control phone search_number" maxlength="15"  name="phone"  client-id="{{ $client->id }}" id="leadphone" type="text" required=""  value="{{ old('phone',$client->phone) }}" />
+                                                <input <?php if (!Auth::user()->can('client.data.all') ){ ?> readonly="" <?php } ?> class="form-control phone search_number" maxlength="15"  name="phone"  client-id="{{ $client->id }}" id="leadphone" type="text" required=""  value="{{ old('phone',$client->phone) }}" />
                                                 <span id="error-msg" class="hide"></span>
                                                 <p id="result"></p>
                                             </div>
@@ -144,7 +144,7 @@
                                         <label>Ptcl<sup>*</sup></label>
                                         <div class="col-sm-11 ">
                                             <div class="form-group mb-0">
-                                                <input <?php if (Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14){ ?> readonly="" <?php } ?> class="form-control ptclphone search_number" name="ptclphone" client-id="{{ $client->id }}" placeholder="Ptcl Phone Number"  id="leadptcl" type="text" required=""  value="{{ old('ptclphone') }}" />
+                                                <input <?php if (!Auth::user()->can('client.data.all')){ ?> readonly="" <?php } ?> class="form-control ptclphone search_number" name="ptclphone" client-id="{{ $client->id }}" placeholder="Ptcl Phone Number"  id="leadptcl" type="text" required=""  value="{{ old('ptclphone') }}" />
                                             </div>
                                         </div>
                                         <div class="col-sm-1 form-group" >
@@ -189,11 +189,11 @@
 
                                                 <div class="row">
                                                     <div class="col-sm-11 mb-2">
-                                                        <input type="text" maxlength="15" required="true" name="edit_international_phone_dynamic[]" class="form-control search_edit_international_multiphone_number" placeholder="301 2345678" id="search_edit_international_number{{ $key+1 }}" counter="{{ $key+1 }}" client_id={{ $client->id }} @if (Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) style="width: 100%; padding-left: 83px;" @else style="width: 68%;"  @endif value="{{ $record->number }}"  <?php if (Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14){ ?>  readonly <?php } ?>>
+                                                        <input type="text" maxlength="15" required="true" name="edit_international_phone_dynamic[]" class="form-control search_edit_international_multiphone_number" placeholder="301 2345678" id="search_edit_international_number{{ $key+1 }}" counter="{{ $key+1 }}" client_id={{ $client->id }} @if (Auth::user()->can('client.data.all')) style="width: 100%; padding-left: 83px;" @else style="width: 68%;"  @endif value="{{ $record->number }}"  <?php if (!Auth::user()->can('client.data.all')){ ?>  readonly <?php } ?>>
                                                         <input type="hidden" name="edit_phone_number_ids[{{$key+1}}]" value="{{ $record->id }}"/>
                                                     </div>
 
-                                                    @if (Auth::user()->role == 1 || Auth::user()->role == 5  || Auth::user()->role == 13 || Auth::user()->role == 14 )
+                                                    @if (Auth::user()->can('client.data.all'))
                                                         <div class="col-sm-1 pt-2">
                                                             <button type="button" class="btn remove-edit-international-input-field" id="remove-edit-international-input-field-{{ $key+1 }}" client_id={{ $client->id }} number_id="{{ $record->id }}"><i class="fa fa-trash fa-2x fa-solid" aria-hidden="true"></i></button>
                                                         </div>
@@ -215,7 +215,7 @@
                                 {{-- <div class="form-group">
                                     @if($client->telephone != '')
                                     <label>TelePhone 1</label>
-                                    <input @if($client->telephone != '') id="telephone" @endif <?php if (Auth::user()->role != 1) { ?> readonly="" <?php } ?> class="form-control search_number" type="text" placeholder="Telephone 1" name="telephone" value="{{ $client->telephone }}"/>
+                                    <input @if($client->telephone != '') id="telephone" @endif <?php if (!Auth::user()->can('client.data.all')) { ?> readonly="" <?php } ?> class="form-control search_number" type="text" placeholder="Telephone 1" name="telephone" value="{{ $client->telephone }}"/>
                                     @else
                                     <label style="width: 100%;">TelePhone 1 </label>
                                     <select name="countryCode1" class="form-control" style="width: 30%;float: left;margin-right: 1%;">
@@ -234,7 +234,7 @@
                                     @if($client->telephone1 != '')
                                     <label>TelePhone 2
                                     </label>
-                                    <input @if($client->telephone1 != '') id="telephone1" @endif  <?php if (Auth::user()->role != 1) { ?> readonly="" <?php } ?> class="form-control search_number" type="text" placeholder="Telephone 2" name="telephone1" value="{{ $client->telephone1 }}"/>
+                                    <input @if($client->telephone1 != '') id="telephone1" @endif  <?php if (!Auth::user()->can('client.data.all')) { ?> readonly="" <?php } ?> class="form-control search_number" type="text" placeholder="Telephone 2" name="telephone1" value="{{ $client->telephone1 }}"/>
                                     @else
                                     <label style="width: 100%;">TelePhone 2 </label>
                                     <select name="countryCode2" class="form-control" style="width: 30%;float: left;margin-right: 1%;">
@@ -257,7 +257,7 @@
                 </div>
             </div>
             <div class="ps-form__bottom">
-                @if(Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14 )
+                @if(Auth::user()->can('client.data.all'))
                 <a class="ps-btn ps-btn--black" href="{{url('all/clients/'.$client->user_id)}}">Go Back >></a>
                 @endif
                 <a class="ps-btn ps-btn--black" href="{{url('clients')}}">Cancel</a>

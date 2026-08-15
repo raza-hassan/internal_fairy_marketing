@@ -58,7 +58,7 @@
 
     <section class="ps-items-listing">
 
-        @if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+        @if (Auth::user()->can('staff.data.all'))
             <div style="background-color:white; margin-bottom:5px;">
                 <div class="container-fluid">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 filter-sec mb-4" >

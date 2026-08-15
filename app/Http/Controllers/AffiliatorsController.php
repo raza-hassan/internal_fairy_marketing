@@ -441,8 +441,9 @@ class AffiliatorsController extends Controller {
         if(Auth::user()->can('affiliator.edit'))
         {
             $isSharedWithMe = $affiliator->sharedUsers()->where('users.id', Auth::user()->id)->exists();
+            $affiliatorVisibleIds = Auth::user()->visibleUserIds('affiliator');
 
-            if ($affiliator->user_id != Auth::user()->id  && !$isSharedWithMe && Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14) {
+            if (!$isSharedWithMe && $affiliatorVisibleIds !== null && !in_array($affiliator->user_id, $affiliatorVisibleIds)) {
                 return back()->withErrors(__('Not Allowed!'));
             }
             $managers = User::where('role', '=', 2)->get();
@@ -1193,7 +1194,7 @@ class AffiliatorsController extends Controller {
             $users = $responce['users']->where('office_id', 1);
         // ====== Users With Helper======
 
-        if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14 )
+        if (Auth::user()->can('affiliator.data.all'))
         {
             if($request->input('user_id') > 0 )
             {
@@ -1453,12 +1454,11 @@ class AffiliatorsController extends Controller {
         {
             $id = 0;
             $search_person = 'user';
-            if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14){
-                // $users = User::where('role', '!=', 0)->where('office_id', 1)->orderBy('id', 'asc')->get();
+            $affiliatorVisibleIds = Auth::user()->visibleUserIds('affiliator');
+            if ($affiliatorVisibleIds === null){
                 $affiliators = Affiliator::where('is_delete', 1)->orderBy('id', 'desc')->paginate(30);
             }else{
-                // $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->orderBy('id', 'asc')->get();
-                $affiliators = Affiliator::where('user_id', Auth::user()->id)->where('is_delete', 1)->orderBy('id', 'desc')->paginate(30);
+                $affiliators = Affiliator::whereIn('user_id', $affiliatorVisibleIds)->where('is_delete', 1)->orderBy('id', 'desc')->paginate(30);
             }
 
             // ====== Users With Helper======
@@ -1547,6 +1547,7 @@ class AffiliatorsController extends Controller {
         // echo '<pre>';print_r($request->input());exit;
         if(Auth::user()->can('trashed.affiliator.view'))
         {
+            $affiliatorVisibleIds = Auth::user()->visibleUserIds('affiliator');
             $condition = array();
             $condition[] = array('is_delete', '=', 1);
 
@@ -1586,33 +1587,25 @@ class AffiliatorsController extends Controller {
             $affiliators = array();
             if (!empty($condition)) {
 
-                // if ($request->input('phone') !=''){
-                //     $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->orderBy('id', 'desc')->paginate(30);
-                // }else{
-                //     $affiliators = Affiliator::where($condition)->orderBy('id', 'desc')->paginate(30);
-                // }
-
-                if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14){
+                if ($affiliatorVisibleIds === null){
                     if ($request->input('phone') !=''){
                         $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->orderBy('id', 'desc')->paginate(30);
                     }else{
                         $affiliators = Affiliator::where($condition)->orderBy('id', 'desc')->paginate(30);
                     }
                 }else{
-                    $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
                     if ($request->input('phone') !=''){
-                        $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate(30);
+                        $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->whereIn('user_id', $affiliatorVisibleIds)->orderBy('id', 'desc')->paginate(30);
                     }else{
-                        $affiliators = Affiliator::where($condition)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate(30);
+                        $affiliators = Affiliator::where($condition)->whereIn('user_id', $affiliatorVisibleIds)->orderBy('id', 'desc')->paginate(30);
                     }
                 }
 
             } else {
-                if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+                if ($affiliatorVisibleIds === null) {
                     $affiliators = Affiliator::orderBy('id', 'desc')->paginate(30);
                 } else {
-                    $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-                    $affiliators = Affiliator::whereIn('user_id', $users)->orWhere('user_id', Auth::user()->id)->orderBy('id', 'desc')->paginate(30);
+                    $affiliators = Affiliator::whereIn('user_id', $affiliatorVisibleIds)->orderBy('id', 'desc')->paginate(30);
                 }
             }
 
@@ -1634,108 +1627,11 @@ class AffiliatorsController extends Controller {
         }
     }
 
-    // public function search(Request $request)
-    // {
-    //     // echo '<pre>';print_r($request->input());exit;
-    //     if(Auth::user()->can('affiliator.view'))
-    //     {
-    //         $condition = array();
-    //         $condition[] = array('is_delete', '=', 0);
-
-    //         if ($request->input('name') != '') {
-    //             $condition[] = array('name', 'Like', '%' . $request->input('name') . '%');
-    //         }
-
-    //         if ($request->input('type') > 0) {
-    //             $condition[] = array('type', $request->input('type'));
-    //         }
-    //         if ($request->input('status') != '') {
-    //             $condition[] = array('status', $request->input('status'));
-    //         }
-
-    //         if ($request->input('email') != '') {
-    //             $condition[] = array('email', '=', '%' . $request->input('email') . '%');
-    //         }
-
-    //         if ($request->input('phone') != '')
-    //         {
-    //             $first_nbr=mb_substr($request->phone, 0 , 1);
-
-    //             if($first_nbr == 0){
-    //                 $phone = substr($request->phone, 1);
-    //             }else{
-    //                 $phone = $request->phone;
-    //             }
-
-    //             // $condition[] = array('phone', 'Like', '%' . $phone . '%');
-    //             $affiliator_numbers =Number::where('type', 'affiliators')->where('number', 'Like', '%' . $phone . '%')->pluck('client_id');
-    //         }
-
-    //         if ($request->input('user_id') > 0) {
-    //             $condition[] = array('user_id', $request->input('user_id'));
-    //         }
-
-    //         // echo '<pre>';print_r($condition);exit;
-
-    //         // Search in the title and body columns from the posts table
-    //         $affiliators = array();
-    //         if (!empty($condition)) {
-
-    //             // if ($request->input('phone') !=''){
-    //             //     $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->orderBy('id', 'desc')->paginate(30);
-    //             // }else{
-    //             //     $affiliators = Affiliator::where($condition)->orderBy('id', 'desc')->paginate(30);
-    //             // }
-
-    //             if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14){
-    //                 if ($request->input('phone') !=''){
-    //                     $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->orderBy('id', 'desc')->paginate(30);
-    //                 }else{
-    //                     $affiliators = Affiliator::where($condition)->orderBy('id', 'desc')->paginate(30);
-    //                 }
-    //             }else{
-    //                 $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-    //                 if ($request->input('phone') !=''){
-    //                     $affiliators = Affiliator::where($condition)->whereIn('id', $affiliator_numbers)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate(30);
-    //                 }else{
-    //                     $affiliators = Affiliator::where($condition)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate(30);
-    //                 }
-    //             }
-
-    //         } else {
-    //             if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
-    //                 $affiliators = Affiliator::orderBy('id', 'desc')->paginate(30);
-    //             } else {
-    //                 $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-    //                 $affiliators = Affiliator::whereIn('user_id', $users)->orWhere('user_id', Auth::user()->id)->orderBy('id', 'desc')->paginate(30);
-    //             }
-    //         }
-
-    //         // echo '<pre>';print_r($records);exit;
-
-    //         $search_person = $request->input('search_person');
-    //         $id = $request->input('current_user');
-
-    //         // ====== Users With Helper======
-    //             $data = array(
-    //                 'id' => Auth::user()->id,
-    //                 'role' => Auth::user()->role,
-    //             );
-    //             $responce = Helper::users($data);
-    //             $users = $responce['users']->where('office_id', 1);
-    //         // ====== Users With Helper======
-
-    //         return view('affiliators.index', compact('affiliators', 'search_person', 'id', 'users'));
-    //     }else{
-    //         return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
-    //     }
-    // }
-
-
     public function search(Request $request)
     {
         if(Auth::user()->can('affiliator.view'))
         {
+            $affiliatorVisibleIds = Auth::user()->visibleUserIds('affiliator');
             $condition = array();
             $condition[] = array('is_delete', '=', 0);
 
@@ -1777,7 +1673,7 @@ class AffiliatorsController extends Controller {
 
             if (!empty($condition)) {
 
-                if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+                if ($affiliatorVisibleIds === null) {
 
                     $query = Affiliator::where($condition);
 
@@ -1798,14 +1694,10 @@ class AffiliatorsController extends Controller {
 
                 } else {
 
-                    $users = User::where('id', Auth::user()->id)
-                        ->orWhere('parent', Auth::user()->id)
-                        ->pluck('id');
-
                     // Own affiliators OR ones shared with the current user
                     $query = Affiliator::where($condition)
-                        ->where(function ($q) use ($users) {
-                            $q->whereIn('user_id', $users)
+                        ->where(function ($q) use ($affiliatorVisibleIds) {
+                            $q->whereIn('user_id', $affiliatorVisibleIds)
                               ->orWhereHas('sharedUsers', function ($sq) {
                                   $sq->where('users.id', Auth::user()->id);
                               });
@@ -1829,13 +1721,11 @@ class AffiliatorsController extends Controller {
                 }
 
             } else {
-                if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+                if ($affiliatorVisibleIds === null) {
                     $affiliators = Affiliator::with('sharedUsers')->orderBy('id', 'desc')->paginate(30);
                 } else {
-                    $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-                    $affiliators = Affiliator::where(function ($q) use ($users) {
-                                $q->whereIn('user_id', $users)
-                                  ->orWhere('user_id', Auth::user()->id)
+                    $affiliators = Affiliator::where(function ($q) use ($affiliatorVisibleIds) {
+                                $q->whereIn('user_id', $affiliatorVisibleIds)
                                   ->orWhereHas('sharedUsers', function ($sq) {
                                       $sq->where('users.id', Auth::user()->id);
                                   });

@@ -64,7 +64,7 @@
                                 </div>
                             </div>
                         </div>
-                        @if(Auth::user()->role==5 || Auth::user()->role==13 || Auth::user()->role==14)
+                        @if(Auth::user()->can('staff.data.all'))
                             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                 <div class="form-group">
                                     <label>Offices </label>
@@ -161,7 +161,7 @@
                                         <div class="inner-side"><label>Created At: </label><span>{{date('M d, Y', strtotime($user->created_at))}}</span></div>
 
                                         @if(Auth::user()->can('staff.trash'))
-                                            @if ($user->role != 5 && $user->role != 13 && $user->role != 14)
+                                            @if (!$user->can('staff.data.all'))
                                                 @if ($user->leads_count()->orWhere("share_id",$user->id)->count() == 0 && $user->client_count()->count() == 0 && $user->affiliator_count()->count() == 0)
                                                     <div class="inner-side">
                                                         <label>Delete Account: </label>
@@ -203,13 +203,13 @@
                             @if(Auth::user()->can('staff.trash'))
                                 @if ($user->leads_count()->orWhere("share_id",$user->id)->count() == 0 && $user->client_count()->count() == 0 && $user->affiliator_count()->count() == 0)
                                     <td style="text-align: center">
-                                        @if ($user->role != 5 && $user->role != 13 && $user->role != 14)
+                                        @if (!$user->can('staff.data.all'))
                                            <a href="{{url('trash/staff/user', $user->id)}}" onclick="return confirm('{{ __('Are you sure you want to trash this record?') }}') ? true : false;"> <i class="fa fa-trash" aria-hidden="true"></i></a>
                                         @endif
                                     </td>
                                 @else
                                     <td style="text-align: center">
-                                        @if ($user->role != 5 && $user->role != 13 && $user->role != 14)
+                                        @if (!$user->can('staff.data.all'))
                                             <a href="#" onclick="return confirm('{{ __('You have to transfer this user data to someone first.') }}') ? false : false;"><i class="fa fa-ban" aria-hidden="true"></i></a>
                                         @endif
                                     </td>

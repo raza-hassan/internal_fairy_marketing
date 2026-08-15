@@ -374,7 +374,7 @@ class LeadsController extends Controller
     public function create()
     {
         if (Auth::user()->can('lead.create')) {
-            if (Auth::user()->role == 1 || Auth::user()->role == 4 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+            if (Auth::user()->can('lead.data.all')) {
                 $sources = LeadSource::orderBy('id', 'desc')->get();
             } else {
                 $sources = LeadSource::where('subtype', 'user')->orderBy('id', 'desc')->get();
@@ -875,12 +875,13 @@ class LeadsController extends Controller
     {
         if (Auth::user()->can('lead.edit')) {
 
-            if (Auth::user()->role == 1 || Auth::user()->role == 4) {
+            if (Auth::user()->can('lead.data.all')) {
                 $sources = LeadSource::orderBy('id', 'desc')->get();
             } else {
                 $sources = LeadSource::where('subtype', 'user')->orderBy('id', 'desc')->get();
             }
-            if ($lead->user_id != Auth::user()->id && Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14) {
+            $leadVisibleIds = Auth::user()->visibleUserIds('lead');
+            if ($leadVisibleIds !== null && !in_array($lead->user_id, $leadVisibleIds)) {
                 return back()->withErrors(__('Not Allowed!'));
             }
             $agents = User::where('role', '!=', 0)->where('status', '=', 1)->get();
@@ -1157,15 +1158,13 @@ class LeadsController extends Controller
     public function trash_leads()
     {
         if (Auth::user()->can('trashed.lead.view')) {
-            if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+            $leadVisibleIds = Auth::user()->visibleUserIds('lead');
+            if ($leadVisibleIds === null) {
                 $leads = Leads::where('is_delete', 1)->orderBy('id', 'desc')->paginate(30);
             } else {
-                // $leads = Leads::where('is_delete' , 1)->where('user_id', Auth::user()->id)->orderBy('id', 'desc')->paginate(30);
-
-                // // Check Where Condition with Or-Condition
-                $leads = Leads::where('is_delete', 1) // First where clause
-                    ->where(function ($query) {
-                        $query->where('user_id', Auth::user()->id)
+                $leads = Leads::where('is_delete', 1)
+                    ->where(function ($query) use ($leadVisibleIds) {
+                        $query->whereIn('user_id', $leadVisibleIds)
                             ->orWhere('share_id', Auth::user()->id);
                     })
                     ->orderBy('id', 'desc')->paginate(30);
@@ -1221,6 +1220,7 @@ class LeadsController extends Controller
     public function trash_search(Request $request)
     {
         if (Auth::user()->can('trashed.lead.view')) {
+            $leadVisibleIds = Auth::user()->visibleUserIds('lead');
             $status = $request->input('status') ? $request->input('status') : 'id';
             $order = $request->input('sort') ? $request->input('sort') : 'ASC';
             $record = $request->input('records') ? $request->input('records') : 30;
@@ -1291,35 +1291,29 @@ class LeadsController extends Controller
                     $condition[] = array('user_id', '=', $request->input('user_id'));
                 }
 
-                if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+                if ($leadVisibleIds === null) {
                     $leads = Leads::where($condition)->whereIn('client_id', $clients)->orderBy($status, $order)->paginate($record);
                 } else {
-                    $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-                    // $leads = Leads::where($condition)->whereIn('user_id', $users)->orWhere('user_id', Auth::user()->id)->whereIn('client_id', $clients)->orderBy($status, $order)->paginate($record);
-                    $leads = Leads::where($condition)->whereIn('user_id', $users)->whereIn('client_id', $clients)->orderBy($status, $order)->paginate($record);
+                    $leads = Leads::where($condition)->whereIn('user_id', $leadVisibleIds)->whereIn('client_id', $clients)->orderBy($status, $order)->paginate($record);
                 }
             } else {
                 if (!empty($condition)) {
                     if ($user_id > 0) {
-                        // $leads = Leads::where($condition)->orWhere('share_id', $user_id)->orderBy($status, $order)->paginate($record);
                         $leads = Leads::where($condition)->where(function ($query) use ($user_id) {
                             $query->where('user_id', $user_id)->orWhere('share_id', $user_id);
                         })->orderBy($status, $order)->paginate($record);
                     } else {
-                        if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+                        if ($leadVisibleIds === null) {
                             $leads = Leads::where('user_id', '>', 0)->where($condition)->orderBy($status, $order)->paginate($record);
                         } else {
-                            $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-                            $leads = Leads::whereIn('user_id', $users)->where($condition)->orderBy($status, $order)->paginate($record);
+                            $leads = Leads::whereIn('user_id', $leadVisibleIds)->where($condition)->orderBy($status, $order)->paginate($record);
                         }
                     }
                 } else {
-                    if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
-                        // $leads = Leads::where('user_id', '!=', 0)->orderBy('id', 'DESC')->paginate(30);
+                    if ($leadVisibleIds === null) {
                         $leads = Leads::where('user_id', '!=', 0)->orderBy($status, $order)->paginate($record);
                     } else {
-                        $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-                        $leads = Leads::whereIn('user_id', $users)->orderBy($status, $order)->paginate($record);
+                        $leads = Leads::whereIn('user_id', $leadVisibleIds)->orderBy($status, $order)->paginate($record);
                     }
                 }
             }
@@ -1354,6 +1348,7 @@ class LeadsController extends Controller
     {
         //    dd($request->all());
         if (Auth::user()->can('lead.view')) {
+            $leadVisibleIds = Auth::user()->visibleUserIds('lead');
             $status = $request->input('status') ? $request->input('status') : 'id';
             $order = $request->input('sort') ? $request->input('sort') : 'ASC';
             $record = $request->input('records') ? $request->input('records') : 30;
@@ -1459,13 +1454,7 @@ class LeadsController extends Controller
             // Search phone number
             if ($request->input('phone') && $request->input('phone') != '') {
 
-                // if ($request->input('user_id') > 0) {
-                //     $condition[] = array('user_id', '=', $request->input('user_id'));
-                // }
-
-                if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
-                    // $leads = Leads::where($condition)->whereIn('client_id', $clients)->orderBy($status, $order);
-
+                if ($leadVisibleIds === null) {
                     $leads = Leads::where($condition)
                         ->when($user_id > 0, function ($query) use ($user_id) {
                             $query->where(function ($q) use ($user_id) {
@@ -1477,11 +1466,7 @@ class LeadsController extends Controller
                         ->orderBy($status, $order);
                 } else {
 
-                    $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-                    // $leads = Leads::where($condition)->whereIn('user_id', $users)->orWhere('user_id', Auth::user()->id)->whereIn('client_id', $clients)->orderBy($status, $order)->paginate($record);
-                    // $leads = Leads::where($condition)->whereIn('user_id', $users)->whereIn('client_id', $clients)->orderBy($status, $order);
-
-                    $allowedUsers = collect($users);
+                    $allowedUsers = collect($leadVisibleIds);
                     if ($user_id > 0) {
                         $allowedUsers->push($user_id);
                     }
@@ -1505,21 +1490,17 @@ class LeadsController extends Controller
                             })
                             ->orderBy($status, $order);
                     } else {
-                        if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+                        if ($leadVisibleIds === null) {
                             $leads = Leads::where('user_id', '>', 0)->where($condition)->orderBy($status, $order);
                         } else {
-                            $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-                            $leads = Leads::whereIn('user_id', $users)->where($condition)->orderBy($status, $order);
+                            $leads = Leads::whereIn('user_id', $leadVisibleIds)->where($condition)->orderBy($status, $order);
                         }
                     }
                 } else {
-                    if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
-                        // $leads = Leads::where('user_id', '!=', 0)->orderBy('id', 'DESC')->paginate(30);
+                    if ($leadVisibleIds === null) {
                         $leads = Leads::where('user_id', '!=', 0)->orderBy($status, $order);
                     } else {
-                        $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
-                        // $leads = Leads::whereIn('user_id', $users)->orWhere('user_id', Auth::user()->id)->orderBy($status, $order)->paginate($record);
-                        $leads = Leads::whereIn('user_id', $users)->orderBy($status, $order);
+                        $leads = Leads::whereIn('user_id', $leadVisibleIds)->orderBy($status, $order);
                     }
                 }
             }
@@ -1708,7 +1689,7 @@ class LeadsController extends Controller
     public function markAsRead(Request $request, $id)
     {
         if ($id) {
-            if (Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+            if (Auth::user()->hasAnyRole(['Manager', 'Head-of-Sale', 'CEO', 'COO'])) {
                 $data = Notification::where('id', $id)->update([
                     'role_read_at'  => Carbon::now(),
                     'read_by_role'  => Auth::user()->role,
@@ -1737,7 +1718,7 @@ class LeadsController extends Controller
 
     public function markAllAsRead(Request $request)
     {
-        if (Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+        if (Auth::user()->hasAnyRole(['Manager', 'Head-of-Sale', 'CEO', 'COO'])) {
             $data = Notification::where('role_read_at', Null)->where('read_by_role', Null)
                 ->where(function ($query) {
                     $query->where('show_to_role', Auth::user()->role)
@@ -1772,14 +1753,14 @@ class LeadsController extends Controller
 
     public function viewAllNotification()
     {
-        if (Auth::user()->role == 1 || Auth::user()->role == 5) {
+        if (Auth::user()->hasAnyRole(['Manager', 'Head-of-Sale'])) {
             $notifications = Notification::where(function ($query) {
                 $query->where('show_to_role', Auth::user()->role)
                     ->orWhere('show_to', Auth::user()->id);
             })
                 ->orderBy('id', 'desc')
                 ->paginate(100);
-        } elseif (Auth::user()->role == 13 || Auth::user()->role == 14) {
+        } elseif (Auth::user()->hasAnyRole(['CEO', 'COO'])) {
             // Array
             $show_to_role  = [Auth::user()->role, 5];
             $show_to  = [Auth::user()->id, 5];
@@ -2241,10 +2222,10 @@ class LeadsController extends Controller
         $no_notifications = Notification::where('show_to_role', 'No')->orderBy('id', 'ASC')->get();
 
         foreach ($yes_notifications as $notification) {
-            if ($notification->showTo->role == 1 || $notification->showTo->role == 5) {
-                if ($notification->showTo->role == 1) {
+            if ($notification->showTo->hasAnyRole(['Manager', 'Head-of-Sale'])) {
+                if ($notification->showTo->hasRole('Manager')) {
                     $role = 5;
-                } elseif ($notification->showTo->role == 5) {
+                } elseif ($notification->showTo->hasRole('Head-of-Sale')) {
                     $role = 1;
                 } else {
                     $role = 0;

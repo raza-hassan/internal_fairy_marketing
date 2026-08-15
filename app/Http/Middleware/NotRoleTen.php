@@ -8,7 +8,7 @@ class NotRoleTen
     public function handle($request, Closure $next)
     {
 
-        if(Auth::user()->role != 10 )
+        if(!Auth::user()->hasRole('Digital Marketing'))
         {
             return $next($request);
         }

@@ -64,7 +64,7 @@ class ClientsController extends Controller {
         if(Auth::user()->can('client.create'))
         {
             //$managers = User::where('role', '=', 2)->get();
-            if (Auth::user()->role == 1 || Auth::user()->role == 4 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+            if (Auth::user()->can('client.data.all'))
             {
                 $sources = LeadSource::orderBy('id', 'desc')->get();
             } else {
@@ -300,7 +300,8 @@ class ClientsController extends Controller {
     {
         if(Auth::user()->can('client.edit'))
         {
-            if ($client->user_id != Auth::user()->id && Auth::user()->role != 1 && Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14) {
+            $clientVisibleIds = Auth::user()->visibleUserIds('client');
+            if ($clientVisibleIds !== null && !in_array($client->user_id, $clientVisibleIds)) {
                 return redirect('clients')->withErrors(__('Not Allowed!'));
             }
 
@@ -614,6 +615,7 @@ class ClientsController extends Controller {
         // echo "<pre>"; print_r($request->all()); exit;
         if(Auth::user()->can('client.view'))
         {
+            $clientVisibleIds = Auth::user()->visibleUserIds('client');
             $record = $request->input('records') ? $request->input('records') : 30;
 
             if($record == 'all'){
@@ -635,8 +637,7 @@ class ClientsController extends Controller {
                 $condition[] = array('user_id', $request->input('user_id'));
             }
 
-            if(Auth::user()->role==11 || Auth::user()->role==12){
-                // echo"check"; exit;
+            if(Auth::user()->hasAnyRole(['Dealor', 'Freelancer'])){
                 $condition[] = array('user_id', Auth::user()->id);
             }
 
@@ -665,29 +666,26 @@ class ClientsController extends Controller {
             $clients = array();
             if (!empty($condition))
             {
-                if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14){
+                if ($clientVisibleIds === null){
                     if ($request->input('phone') !=''){
                         $clients = Clients::where($condition)->whereIn('id', $client_numbers)->orderBy('id', 'desc')->paginate($record);
                     }else{
                         $clients = Clients::where($condition)->orderBy('id', 'desc')->paginate($record);
                     }
                 }else{
-                    $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
                     if ($request->input('phone') !=''){
-                        $clients = Clients::where($condition)->whereIn('id', $client_numbers)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate($record);
+                        $clients = Clients::where($condition)->whereIn('id', $client_numbers)->whereIn('user_id', $clientVisibleIds)->orderBy('id', 'desc')->paginate($record);
                     }else{
-                        $clients = Clients::where($condition)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate($record);
+                        $clients = Clients::where($condition)->whereIn('user_id', $clientVisibleIds)->orderBy('id', 'desc')->paginate($record);
                     }
                 }
             } else
             {
-                if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+                if ($clientVisibleIds === null) {
                     $clients = Clients::orderBy('id', 'desc')->paginate($record);
                 } else {
-                    $users = User::where('parent', Auth::user()->id)->pluck('id');
-                    $clients = Clients::whereIn('user_id', $users)->orWhere('user_id', Auth::user()->id)->orderBy('id', 'desc')->paginate($record);
+                    $clients = Clients::whereIn('user_id', $clientVisibleIds)->orderBy('id', 'desc')->paginate($record);
                 }
-                // $clients = Clients::where($condition)->orderBy('id', 'desc')->paginate($record);
             }
 
             // ===== Users With Helper=====
@@ -725,12 +723,11 @@ class ClientsController extends Controller {
         {
             $search_person = 'user';
             $id = 0;
-            if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14){
-                // $users = User::where('role', '!=', 0)->where('office_id', 1)->orderBy('id', 'asc')->get();
+            $clientVisibleIds = Auth::user()->visibleUserIds('client');
+            if ($clientVisibleIds === null){
                 $clients = Clients::where('is_delete', 1)->orderBy('id', 'desc')->paginate(30);
             }else{
-                // $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->orderBy('id', 'asc')->get();
-                $clients = Clients::where('user_id', Auth::user()->id)->where('is_delete', 1)->orderBy('id', 'desc')->paginate(30);
+                $clients = Clients::whereIn('user_id', $clientVisibleIds)->where('is_delete', 1)->orderBy('id', 'desc')->paginate(30);
             }
 
             // ======== Users With Helper========
@@ -823,6 +820,7 @@ class ClientsController extends Controller {
     {
         if(Auth::user()->can('trashed.client.view'))
         {
+            $clientVisibleIds = Auth::user()->visibleUserIds('client');
             $record = $request->input('records') ? $request->input('records') : 30;
             if($record == 'all'){
                 $record = count(Clients::where('is_delete', 1)->get());
@@ -843,8 +841,7 @@ class ClientsController extends Controller {
                 $condition[] = array('user_id', $request->input('user_id'));
             }
 
-            if(Auth::user()->role==11 || Auth::user()->role==12){
-                // echo"check"; exit;
+            if(Auth::user()->hasAnyRole(['Dealor', 'Freelancer'])){
                 $condition[] = array('user_id', Auth::user()->id);
             }
 
@@ -873,28 +870,26 @@ class ClientsController extends Controller {
             $clients = array();
             if (!empty($condition)) {
 
-                if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14){
+                if ($clientVisibleIds === null){
                     if ($request->input('phone') !=''){
                         $clients = Clients::where($condition)->whereIn('id', $client_numbers)->orderBy('id', 'desc')->paginate($record);
                     }else{
                         $clients = Clients::where($condition)->orderBy('id', 'desc')->paginate($record);
                     }
                 }else{
-                    $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->pluck('id');
                     if ($request->input('phone') !=''){
-                        $clients = Clients::where($condition)->whereIn('id', $client_numbers)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate($record);
+                        $clients = Clients::where($condition)->whereIn('id', $client_numbers)->whereIn('user_id', $clientVisibleIds)->orderBy('id', 'desc')->paginate($record);
                     }else{
-                        $clients = Clients::where($condition)->whereIn('user_id', $users)->orderBy('id', 'desc')->paginate($record);
+                        $clients = Clients::where($condition)->whereIn('user_id', $clientVisibleIds)->orderBy('id', 'desc')->paginate($record);
                     }
                 }
             }
             else {
-                if (Auth::user()->role == 5)
+                if ($clientVisibleIds === null)
                 {
                     $clients = Clients::where('is_delete', 1)->orderBy('id', 'desc')->paginate($record);
                 } else {
-                    $users = User::where('parent', Auth::user()->id)->pluck('id');
-                    $clients = Clients::whereIn('user_id', $users)->orWhere('user_id', Auth::user()->id)->orderBy('id', 'desc')->paginate($record);
+                    $clients = Clients::whereIn('user_id', $clientVisibleIds)->orderBy('id', 'desc')->paginate($record);
                 }
             }
 

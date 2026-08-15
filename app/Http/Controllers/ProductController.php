@@ -32,7 +32,7 @@ class ProductController extends Controller
     {
         if(Auth::user()->can('inventory.view'))
         {
-            if(Auth::user()->role==11 || Auth::user()->role==12 ){
+            if(Auth::user()->hasAnyRole(['Dealor', 'Freelancer'])){
                 $records = Product::where('status', 'Available')->orderBy('created_at', 'asc')->paginate(50);
             }else{
                 $records = Product::orderBy('created_at', 'asc')->paginate(50);
@@ -618,7 +618,7 @@ class ProductController extends Controller
             $clients = array();
             if ($request->input('name') || $request->input('unit_id') != '' || $request->input('project_id') != 0 || $request->input('category_id') != 0 || $request->input('floor') != '') {
                 // $records = Product::where($condition)->orderBy('id', 'desc')->paginate(30);
-                if(Auth::user()->role==11 || Auth::user()->role==12 ){
+                if(Auth::user()->hasAnyRole(['Dealor', 'Freelancer'])){
                     $records = Product::where($condition)->where('status', 'Available')->orderBy('id', 'asc')->paginate(30);
                 }else{
                     $records = Product::where($condition)->orderBy('id', 'desc')->paginate(30);
