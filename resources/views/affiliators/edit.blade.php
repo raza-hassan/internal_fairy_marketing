@@ -144,7 +144,7 @@
                                 <input type="hidden" name="oldoffinspic" value="{{$affiliator->offinspic}}">
                                 <input type="hidden" name="added_by_user_id" value="{{$affiliator->user_id}}">
                                 <input type="hidden" name="affiliator_id" value="{{$affiliator->id}}">
-                                @if(Auth::user()->role==4 && $affiliator->status==2)
+                                @if(Auth::user()->hasRole('Affiliator') && $affiliator->status==2)
                                     <input type="hidden" name="status" value="3">
                                 @endif
                             </div>

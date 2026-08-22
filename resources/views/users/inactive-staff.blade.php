@@ -217,13 +217,13 @@
                             @endif
                             {{-- ============================================================================================== --}}
                             <td>
-                                @if(Auth::user()->id ==  $user->id && Auth::user()->role == 3 || Auth::user()->role == 4)
+                                @if(Auth::user()->id ==  $user->id && Auth::user()->hasRole('BDO') || Auth::user()->hasRole('Affiliator'))
                                 {{-- <a rel="tooltip" href="{{ url('profile/edit') }}" data-original-title="" title="">
                                 <i class="fa fa-edit" aria-hidden="true"></i>
                                 <div class="ripple-container"></div>
                                 </a> --}}
                                 @endif
-                                @if(Auth::user()->role == 1)
+                                @if(Auth::user()->hasRole('Manager'))
                                 {{-- <a rel="tooltip" href="{{ url('user/edit', $user->id) }}" data-original-title="" title="">
                                 <i class="fa fa-edit" aria-hidden="true"></i>
                                 <div class="ripple-container"></div>
