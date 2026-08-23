@@ -1778,73 +1778,59 @@ class LeadsController extends Controller
         return view('all_notifications', compact('notifications'));
     }
 
-    public function move_numbers()
+public function move_numbers()
     {
         $affiliator_counter = 0;
         $client_counter = 0;
 
-        $affiliators = Affiliator::all();
-        foreach ($affiliators as $record) {
-            if ($record->phone != '') {
-                $phone = $record->phone;
-                $number = Number::Where('number', 'like', '%' . $phone . '%')->first();
-                if (empty($number)) {
-                    DB::table('numbers')->insert(array('number' => $phone, 'type' => 'affiliators', 'client_id' => $record->id));
-                    $affiliator_counter++;
-                }
+        // Load all existing numbers ONCE into a lookup set (instead of a query per phone)
+        $existingNumbers = Number::pluck('number')->flip()->all(); // ['12345' => 0, ...]
+
+        $rows = [];
+
+        $addNumber = function ($phone, $type, $id) use (&$rows, &$existingNumbers) {
+            if ($phone == null || $phone == '') {
+                return false;
             }
-            if ($record->telephone != '') {
-                $phone = $record->telephone;
-                $number = Number::Where('number', 'like', '%' . $phone . '%')->first();
-                if (empty($number)) {
-                    DB::table('numbers')->insert(array('number' => $phone, 'type' => 'affiliators', 'client_id' => $record->id));
-                    $affiliator_counter++;
-                }
+            if (isset($existingNumbers[$phone])) {
+                return false;
             }
-            if ($record->telephone1 != '') {
-                $phone = $record->telephone1;
-                $number = Number::Where('number', 'like', '%' . $phone . '%')->first();
-                if (empty($number)) {
-                    DB::table('numbers')->insert(array('number' => $phone, 'type' => 'affiliators', 'client_id' => $record->id));
-                    $affiliator_counter++;
+            // mark as seen immediately so duplicates within this same run aren't inserted twice
+            $existingNumbers[$phone] = 0;
+            $rows[] = ['number' => $phone, 'type' => $type, 'client_id' => $id];
+            return true;
+        };
+
+        Affiliator::select('id', 'phone', 'telephone', 'telephone1')
+            ->chunk(1000, function ($affiliators) use (&$affiliator_counter, $addNumber) {
+                foreach ($affiliators as $record) {
+                    foreach (['phone', 'telephone', 'telephone1'] as $field) {
+                        if ($addNumber($record->$field, 'affiliators', $record->id)) {
+                            $affiliator_counter++;
+                        }
+                    }
                 }
-            }
+            });
+
+        Clients::select('id', 'phone', 'telephone', 'telephone1')
+            ->chunk(1000, function ($clients) use (&$client_counter, $addNumber) {
+                foreach ($clients as $record) {
+                    foreach (['phone', 'telephone', 'telephone1'] as $field) {
+                        if ($addNumber($record->$field, 'clients', $record->id)) {
+                            $client_counter++;
+                        }
+                    }
+                }
+            });
+
+        // Bulk insert in batches instead of one-row-at-a-time
+        foreach (array_chunk($rows, 500) as $batch) {
+            DB::table('numbers')->insert($batch);
         }
 
-        $clients = Clients::all();
-        foreach ($clients as $record) {
-            if ($record->phone != '') {
-                $phone = $record->phone;
-                $number = Number::Where('number', 'like', '%' . $phone . '%')->first();
-                if (empty($number)) {
-                    DB::table('numbers')->insert(array('number' => $phone, 'type' => 'clients', 'client_id' => $record->id));
-                    $client_counter++;
-                }
-            }
-            if ($record->telephone != '') {
-                $phone = $record->telephone;
-                $number = Number::Where('number', 'like', '%' . $phone . '%')->first();
-                if (empty($number)) {
-                    DB::table('numbers')->insert(array('number' => $phone, 'type' => 'clients', 'client_id' => $record->id));
-                    $client_counter++;
-                }
-            }
-            if ($record->telephone1 != '') {
-                $phone = $record->telephone1;
-                $number = Number::Where('number', 'like', '%' . $phone . '%')->first();
-                if (empty($number)) {
-                    DB::table('numbers')->insert(array('number' => $phone, 'type' => 'clients', 'client_id' => $record->id));
-                    $client_counter++;
-                }
-            }
-        }
-
-        echo "All numbers has been add into Table";
-        echo '<br>';
-        echo $client_counter . " Clients add into Table";
-        echo '<br>';
-        echo $affiliator_counter . " Affiliators add into Table";
-        echo '<br>';
+        echo "All numbers has been add into Table<br>";
+        echo $client_counter . " Clients add into Table<br>";
+        echo $affiliator_counter . " Affiliators add into Table<br>";
     }
 
     public function confirmUserAjax(Request $request)

@@ -91,40 +91,6 @@
                             <li class="{{ $activePage == 'settings' ? 'active' : '' }}"><a href="{{url('admin/settings')}}">Settings</a></li>
                         </ul>
                     </div>
-                    {{-- ========================================================================================== --}}
-                @elseif (Auth::user()->hasRole('Out Sider'))
-                    <div class="navbar-menu" id="open-navbar1">
-                        <ul class="navbar-nav">
-                            <li class="{{ $activePage == 'inventory' ? 'active' : '' }}"><a href="{{url('outer/inventory')}}">Inventory</a></li>
-                        </ul>
-                    </div>
-		        @elseif (Auth::user()->hasRole('Digital Marketing'))
-                    <div class="navbar-menu" id="open-navbar1">
-                        <ul class="navbar-nav">
-                            <li class="{{ $activePage == 'inventory' ? 'active' : '' }}"><a href="{{url('/compain')}}">Compain</a></li>
-                        </ul>
-                    </div>
-
-                @elseif (Auth::user()->hasRole('Dealor'))
-                    <div class="navbar-menu" id="open-navbar1">
-                        <ul class="navbar-nav">
-                            {{-- <li class="{{ $activePage == 'dashboard' ? 'active' : '' }}"><a href="{{url('/')}}">Dashboard</a></li> --}}
-                            <li class="{{ $activePage == 'inventory' ? 'active' : '' }}"><a href="{{url('inventory')}}">Inventory</a></li>
-                        </ul>
-                    </div>
-
-                @elseif (Auth::user()->hasRole('Freelancer'))
-                    <div class="navbar-menu" id="open-navbar1">
-                        <ul class="navbar-nav">
-                            <li class="{{ $activePage == 'dashboard' ? 'active' : '' }}"><a href="{{url('/')}}">Dashboard</a></li>
-                            <li class="{{ $activePage == 'leads' ? 'active' : '' }}"><a href="{{url('leads')}}">  Leads</a></li>
-                            <li class="{{ $activePage == 'clients' ? 'active' : '' }}"><a href="{{url('clients')}}">Customers</a></li>
-                            <li class="{{ $activePage == 'inventory' ? 'active' : '' }}"><a href="{{url('inventory')}}">Inventory</a></li>
-                        </ul>
-                    </div>
-
-                    {{-- ========================================================================================== --}}
-
                 @else
                     <div class="navbar-menu" id="open-navbar1">
                         <ul class="navbar-nav">
@@ -134,7 +100,6 @@
                                 <li class="{{ $activePage == 'leads' ? 'active' : '' }}"><a href="{{url('leads')}}">  Leads</a></li>
                             @endif
 
-                            {{-- @if(Auth::user()->department_id != 2 && Auth::user()->department_id != 5 ) --}}
                             @if(Auth::user()->can('client.view'))
                                 <li class="{{ $activePage == 'clients' ? 'active' : '' }}"><a href="{{url('clients')}}">Customers</a></li>
                             @endif
@@ -147,9 +112,16 @@
                                 <li class="{{ $activePage == 'inventory' ? 'active' : '' }}"><a href="{{url('inventory')}}">Inventory</a></li>
                             @endif
 
-                            {{-- @if(Auth::user()->role == 0 || Auth::user()->role == 1 || Auth::user()->role == 5) --}}
                             @if(Auth::user()->can('new-leads.view'))
                                 <li class="{{ $activePage == 'newleads' ? 'active' : '' }}"><a href="{{url('newleads')}}">New Leads</a></li>
+                            @endif
+
+                            @if(Auth::user()->hasRole('Digital Marketing'))
+                                <li class="{{ $activePage == 'inventory' ? 'active' : '' }}"><a href="{{url('/compain')}}">Compain</a></li>
+                            @endif
+
+                            @if (Auth::user()->hasRole('Out Sider'))
+                                <li class="{{ $activePage == 'inventory' ? 'active' : '' }}"><a href="{{url('outer/inventory')}}">Inventory</a></li>
                             @endif
                         </ul>
                     </div>
