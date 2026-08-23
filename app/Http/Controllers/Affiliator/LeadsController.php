@@ -11,6 +11,7 @@ use App\Models\TransferLead;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\Clients;
+use App\Models\Number;
 use App\Models\Task;
 use App\Models\Product;
 use App\Models\Project;
@@ -241,6 +242,11 @@ class LeadsController extends Controller {
                         'phone' => $data['phonenumber']
                     ]
                 );
+
+                if ($data['phonenumber'] != '' && !Number::where('number', 'like', '%' . $data['phonenumber'] . '%')->exists()) {
+                    Number::insert(['number' => $data['phonenumber'], 'type' => 'clients', 'client_id' => $client->id]);
+                }
+
                 Leads::create(['client_id' => $client->id, 'project_id' => $campaign['project_id'], 'source_id' => 3, 'office_id' => $campaign['office_id']]);
                 $counter++;
             } else {

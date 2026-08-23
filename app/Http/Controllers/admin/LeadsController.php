@@ -31,6 +31,9 @@ use App\Models\User;
 use App\Models\Clients;
 
 
+use App\Models\Number;
+
+
 use App\Models\LeadCategory;
 
 
@@ -450,6 +453,13 @@ public function store(Request $request) {
 
 
     //
+
+
+                    foreach ([$client->phone, $client->telephone, $client->telephone1] as $number) {
+                        if ($number != '' && !Number::where('number', 'like', '%' . $number . '%')->exists()) {
+                            Number::insert(['number' => $number, 'type' => 'clients', 'client_id' => $client->id]);
+                        }
+                    }
 
 
                     Leads::create($request->merge(['client_id' => $client->id])->all());

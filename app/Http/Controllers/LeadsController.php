@@ -209,7 +209,11 @@ class LeadsController extends Controller
                 "message" => "Lead ID " . $lead->id . " Created Successfully"
             ], 200);
         } else {
-            if (!empty($client) && !empty($client_record)) {
+            if (!empty($client)) {
+                if (empty($client_record)) {
+                    Number::insert(['number' => $phone, 'type' => 'clients', 'client_id' => $client->id]);
+                }
+
                 $lead = Leads::create($request->merge([
                     'client_id' => $client->id,
                     'user_id' => !empty($client['user_id']) ? $client['user_id'] : 21,
