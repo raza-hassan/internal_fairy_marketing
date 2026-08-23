@@ -216,8 +216,7 @@ class UserController extends Controller
             $user->save();
 
             if ($request->assign_role) {
-                $assign = (int)$request->assign_role;
-                $user->assignRole($assign);
+                $user->syncRoles(array_map('intval', $request->assign_role));
             }
 
             // ======Send Notification To Parent User====
@@ -251,7 +250,7 @@ class UserController extends Controller
             }
             // ==========Notification End==========
 
-            return redirect('/staff')->withStatus(__('User successfully created.'));
+            return redirect()->route('view.staff')->withStatus(__('User successfully created.'));
         } else {
             return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }
@@ -333,9 +332,7 @@ class UserController extends Controller
             $user->save();
 
             if ($request->assign_role) {
-                $user->roles()->detach();
-                $assign = (int)$request->assign_role;
-                $user->assignRole($assign);
+                $user->syncRoles(array_map('intval', $request->assign_role));
             }
 
             return back()->withStatus(__('User successfully updated.'));
@@ -459,7 +456,7 @@ class UserController extends Controller
                 'is_delete' => 1
             ]);
             // }
-            return redirect('/staff')->withStatus(__('User Trashed Successfully.'));
+            return redirect()->route('view.staff')->withStatus(__('User Trashed Successfully.'));
         } else {
             return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }
