@@ -184,13 +184,10 @@ class FacebookController extends Controller
 
                             foreach ($extractNumbers as $phoneNumber)
                             {
-                                // echo '+'.$phoneNumber; echo "<br>";exit;
-                                // $checkNumber = Number::where('number' , 'like', '%' . $phoneNumber . '%')->first();
-
-                                // if(empty($checkNumber))
-                                // {
+                                if (!Number::where('number', 'like', '%' . $phoneNumber . '%')->exists())
+                                {
                                     Number::insert([ 'number' => '+'.$phoneNumber, 'type' => 'clients', 'client_id' => $client->id,]);
-                                // }
+                                }
                             }
 
                             $counter++;
@@ -200,6 +197,18 @@ class FacebookController extends Controller
                             if (!empty($client))
                             {
                                 $record_exist[] = $client->id;
+
+                                // We only get here when $records (the numbers-table lookup) was empty,
+                                // so this client's number(s) are known to be missing from the table.
+                                // Still guard per-number: $records was checked against $processedNumbers,
+                                // which isn't guaranteed to be formatted identically to $extractNumbers.
+                                foreach ($extractNumbers as $phoneNumber)
+                                {
+                                    if (!Number::where('number', 'like', '%' . $phoneNumber . '%')->exists())
+                                    {
+                                        Number::insert([ 'number' => '+'.$phoneNumber, 'type' => 'clients', 'client_id' => $client->id,]);
+                                    }
+                                }
 
                                 $leads = Leads::where('client_id', $client['id'])->get();
 
@@ -213,16 +222,6 @@ class FacebookController extends Controller
                                         'office_id' => $client['office_id'],
                                         'added_by' => Auth::user()->id,
                                     ]);
-
-                                    foreach ($extractNumbers as $phoneNumber)
-                                    {
-                                        // $checkNumber = Number::where('number' , 'like', '%' . $phoneNumber . '%')->first();
-
-                                        // if(empty($checkNumber))
-                                        // {
-                                            Number::insert([ 'number' => '+'.$phoneNumber, 'type' => 'clients', 'client_id' => $client->id,]);
-                                        // }
-                                    }
 
                                     $counter++;
                                 }

@@ -211,7 +211,11 @@ class FacebookLeadSyncService
 
             app(\App\Services\MetaCapiService::class)->sendLeadEvent($client, $lead, $campaign, $facebook_long_lived_token, $context);
         } else {
-            if (!empty($client) && !empty($client_record) && !empty($campaign)) {
+            if (!empty($client) && !empty($campaign)) {
+                if (empty($client_record) && !empty($check_phone)) {
+                    Number::insert(['number' => $phone, 'type' => 'clients', 'client_id' => $client->id]);
+                }
+
                 $leads = Leads::where('client_id', $client['id'])->where('project_id', $campaign->project_id)->get();
 
                 if ($leads->isEmpty()) {
