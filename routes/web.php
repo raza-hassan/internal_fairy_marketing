@@ -25,6 +25,11 @@ Route::get('/cache_clear', function () {
     return "Cache, View, Config, Optimize & Route All is cleared";
 });
 
+
+Route::get('/branch', function () {
+    return "Branch = Feature-Dynamic-Data";
+});
+
 Route::get('/run-migration', function () {
     Artisan::call('migrate', [
         '--force' => true,
