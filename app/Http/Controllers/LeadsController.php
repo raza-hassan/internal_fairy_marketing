@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Helpers\Helper;
+use App\Models\Designations;
 use App\Models\Leads;
 use App\Models\LeadSource;
 use App\Models\LeadStatus;
@@ -2214,9 +2215,9 @@ public function move_numbers()
         foreach ($yes_notifications as $notification) {
             if ($notification->showTo->hasAnyRole(['Manager', 'Head-of-Sale'])) {
                 if ($notification->showTo->hasRole('Manager')) {
-                    $role = 5;
-                } elseif ($notification->showTo->hasRole('Head-of-Sale')) {
                     $role = 1;
+                } elseif ($notification->showTo->hasRole('Head-of-Sale')) {
+                    $role = 5;
                 } else {
                     $role = 0;
                 }

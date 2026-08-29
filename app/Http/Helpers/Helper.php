@@ -50,7 +50,7 @@ class Helper
     public static function notificationsForCurrentUser($limit = 50)
     {
         $user = Auth::user();
-        $isPrivileged = in_array($user->role, [1, 5, 13, 14]);
+        $isPrivileged = $user->hasAnyRole(['Manager', 'Head-of-Sale', 'CEO', 'COO']);
 
         if ($isPrivileged) {
             $scope = function ($query) use ($user) {
@@ -138,17 +138,18 @@ class Helper
     {
         // echo"<pre>"; print_r($data); exit;
 
-        if ($data['role'] == 13) {
+        $currentUser = User::find($data['id']);
+
+        if ($currentUser && $currentUser->hasRole('CEO')) {
             $account = 'ceo';
-        } elseif ($data['role'] == 14) {
+        } elseif ($currentUser && $currentUser->hasRole('COO')) {
             $account = 'coo';
-        } elseif ($data['role'] == 5) {
+        } elseif ($currentUser && $currentUser->hasRole('Head-of-Sale')) {
             $account = 'hod';
         } else {
             $account = 'user';
         }
 
-        $currentUser = User::find($data['id']);
         $staffVisibleIds = $currentUser ? $currentUser->visibleUserIds('staff') : [$data['id']];
 
         if ($staffVisibleIds === null) {
@@ -169,17 +170,18 @@ class Helper
     {
         // echo"<pre>"; print_r($data); exit;
 
-        if ($data['role'] == 13) {
+        $currentUser = User::find($data['id']);
+
+        if ($currentUser && $currentUser->hasRole('CEO')) {
             $account = 'ceo';
-        } elseif ($data['role'] == 14) {
+        } elseif ($currentUser && $currentUser->hasRole('COO')) {
             $account = 'coo';
-        } elseif ($data['role'] == 5) {
+        } elseif ($currentUser && $currentUser->hasRole('Head-of-Sale')) {
             $account = 'hod';
         } else {
             $account = 'user';
         }
 
-        $currentUser = User::find($data['id']);
         $staffVisibleIds = $currentUser ? $currentUser->visibleUserIds('staff') : [$data['id']];
 
         if ($staffVisibleIds === null) {
