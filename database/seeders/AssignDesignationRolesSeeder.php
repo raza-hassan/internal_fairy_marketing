@@ -44,6 +44,7 @@ class AssignDesignationRolesSeeder extends Seeder
         'Freelancer' => 'Freelancer',
         'CEO' => 'CEO',
         'COO' => 'COO',
+        'Can-See-All-Data' => 'Can-See-All-Data'
     ];
 
     public function run()

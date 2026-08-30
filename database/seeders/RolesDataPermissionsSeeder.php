@@ -36,10 +36,11 @@ class RolesDataPermissionsSeeder extends Seeder
         'Freelancer',
         'CEO',
         'COO',
+        'Can-See-All-Data',
     ];
 
     /** Roles that default to seeing ALL data (everyone else defaults to own + subordinates). */
-    protected array $allDataRoleNames = ['CEO', 'COO'];
+    protected array $allDataRoleNames = ['CEO', 'COO','Can-See-All-Data'];
 
     /** Modules that get a "See Own Data" / "See All Data" permission pair. */
     protected array $dataModules = ['lead', 'client', 'affiliator', 'staff', 'target'];
