@@ -379,7 +379,8 @@ class LeadsController extends Controller
     public function create()
     {
         if (Auth::user()->can('lead.create')) {
-            if (Auth::user()->can('lead.data.all')) {
+            if (Auth::user()->can('lead.data.all') || Auth::user()->hasRole(['Manager', 'Affiliator', 'Head of Sales', 'CEO', 'COO']))
+            {
                 $sources = LeadSource::orderBy('id', 'desc')->get();
             } else {
                 $sources = LeadSource::where('subtype', 'user')->orderBy('id', 'desc')->get();
@@ -880,11 +881,13 @@ class LeadsController extends Controller
     {
         if (Auth::user()->can('lead.edit')) {
 
-            if (Auth::user()->can('lead.data.all')) {
+            if (Auth::user()->can('lead.data.all') || Auth::user()->hasRole(['Manager', 'Affiliator', 'Head of Sales', 'CEO', 'COO']))
+            {
                 $sources = LeadSource::orderBy('id', 'desc')->get();
             } else {
                 $sources = LeadSource::where('subtype', 'user')->orderBy('id', 'desc')->get();
             }
+
             $leadVisibleIds = Auth::user()->visibleUserIds('lead');
             if ($leadVisibleIds !== null && !in_array($lead->user_id, $leadVisibleIds)) {
                 return back()->withErrors(__('Not Allowed!'));

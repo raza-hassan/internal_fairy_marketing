@@ -64,7 +64,7 @@ class ClientsController extends Controller {
         if(Auth::user()->can('client.create'))
         {
             //$managers = User::where('role', '=', 2)->get();
-            if (Auth::user()->can('client.data.all'))
+            if (Auth::user()->can('client.data.all') || Auth::user()->hasRole(['Manager', 'Affiliator', 'Head of Sales', 'CEO', 'COO']))
             {
                 $sources = LeadSource::orderBy('id', 'desc')->get();
             } else {
