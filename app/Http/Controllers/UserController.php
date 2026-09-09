@@ -216,8 +216,7 @@ class UserController extends Controller
             $user->save();
 
             if ($request->assign_role) {
-                $assign = (int)$request->assign_role;
-                $user->assignRole($assign);
+                $user->syncRoles(array_map('intval', $request->assign_role));
             }
 
             // ======Send Notification To Parent User====
@@ -251,7 +250,7 @@ class UserController extends Controller
             }
             // ==========Notification End==========
 
-            return redirect('/staff')->withStatus(__('User successfully created.'));
+            return redirect()->route('view.staff')->withStatus(__('User successfully created.'));
         } else {
             return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }
@@ -333,9 +332,7 @@ class UserController extends Controller
             $user->save();
 
             if ($request->assign_role) {
-                $user->roles()->detach();
-                $assign = (int)$request->assign_role;
-                $user->assignRole($assign);
+                $user->syncRoles(array_map('intval', $request->assign_role));
             }
 
             return back()->withStatus(__('User successfully updated.'));
@@ -373,12 +370,14 @@ class UserController extends Controller
             }
             // For Role 5 only
 
-            if (Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14) {
-                $condition[] = array('parent', '=', Auth::user()->id);
-            }
+            $staffVisibleIds = Auth::user()->visibleUserIds('staff');
 
             // Search in the title and body columns from the posts table
-            $users = User::where($condition)->orderBy('id', 'asc')->paginate(50);
+            $users = User::where($condition)
+                ->when($staffVisibleIds !== null, function ($query) use ($staffVisibleIds) {
+                    $query->whereIn('id', array_diff($staffVisibleIds, [Auth::user()->id]));
+                })
+                ->orderBy('id', 'asc')->paginate(50);
 
             $offices = Offices::orderBy('id', 'asc')->get();
 
@@ -457,7 +456,7 @@ class UserController extends Controller
                 'is_delete' => 1
             ]);
             // }
-            return redirect('/staff')->withStatus(__('User Trashed Successfully.'));
+            return redirect()->route('view.staff')->withStatus(__('User Trashed Successfully.'));
         } else {
             return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }
@@ -467,16 +466,12 @@ class UserController extends Controller
     {
         // echo"yes";exit;
         if (Auth::user()->can('trashed.staff.view')) {
-            if (Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14) {
+            $staffVisibleIds = Auth::user()->visibleUserIds('staff');
+            if ($staffVisibleIds === null) {
                 $users = $model->where('is_delete', 1)->orderBy('id', 'asc')->paginate(50);
             } else {
-                // $users = $model->where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->where('is_delete', 1)->orderBy('id', 'asc')->paginate(50);
-
-                $users = $model->where('is_delete', 1) // First where clause
-                    ->where(function ($query) {
-                        $query->where('id', Auth::user()->id)
-                            ->Orwhere('parent', Auth::user()->id);
-                    })
+                $users = $model->where('is_delete', 1)
+                    ->whereIn('id', $staffVisibleIds)
                     ->orderBy('id', 'desc')->paginate(50);
             }
 
@@ -520,11 +515,13 @@ class UserController extends Controller
             if ($request->input('office_id') != '') {
                 $condition[] = array('office_id', 'Like', '%' . $request->input('office_id') . '%');
             }
-            if (Auth::user()->role != 5 && Auth::user()->role != 13 && Auth::user()->role != 14) {
-                $condition[] = array('parent', '=', Auth::user()->id);
-            }
+            $staffVisibleIds = Auth::user()->visibleUserIds('staff');
 
-            $users = User::where($condition)->orderBy('id', 'asc')->paginate(50);
+            $users = User::where($condition)
+                ->when($staffVisibleIds !== null, function ($query) use ($staffVisibleIds) {
+                    $query->whereIn('id', array_diff($staffVisibleIds, [Auth::user()->id]));
+                })
+                ->orderBy('id', 'asc')->paginate(50);
 
             $offices = Offices::orderBy('id', 'DESC')->get();
             // $office_id = 0;

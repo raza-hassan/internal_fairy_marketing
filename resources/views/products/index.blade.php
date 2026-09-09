@@ -251,7 +251,7 @@
                             </div>
                         </div>
 
-                        @if(Auth::user()->role !=11 && Auth::user()->role !=12)
+                        @if(!Auth::user()->hasAnyRole(['Dealor', 'Freelancer']))
                             <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                                 <div class="form-group">
                                     <label>Status </label>
@@ -393,7 +393,7 @@
                             <th>Status</th>
                             <!--<th>Sold By</th>-->
 
-                            @if(Auth::user()->role==1 || Auth::user()->role==5 || Auth::user()->role==13 || Auth::user()->role==14)
+                            @if(Auth::user()->can('inventory.approve.option'))
                                 <th>Approved</th>
                             @endif
 
@@ -794,7 +794,7 @@ if ($record->type != '') {
                             </td>-->
 
 
-                            @if (Auth::user()->role==1 || Auth::user()->role==5 || Auth::user()->role==13 || Auth::user()->role==14)
+                            @if (Auth::user()->can('inventory.approve.option'))
                                 <td>
                                     @if(Auth::user()->can('inventory.approve.option'))
                                         @if ($record->status == 'Sold' && $record->hold_status == 1 && $record->hold_by != 0 && $record->is_approved == 1 && $record->approved_by > 0)

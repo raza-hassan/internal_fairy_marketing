@@ -6,6 +6,11 @@
 
 @include('users.sidebar')
 
+<link href="{{ asset('public/multiselect/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
+<link href="{{ asset('public/multiselect/plugins/select2/css/select2-bootstrap4.css') }}" rel="stylesheet" />
+<script src="{{ asset('public/multiselect/plugins/select2/js/select2.min.js') }}"></script>
+<script src="{{ asset('public/multiselect/js/jquery.min.js') }}"></script>
+
 <div class="ps-main__wrapper">
 
     <header class="header--dashboard">
@@ -214,7 +219,7 @@
 
                             <div class="ps-block__content">
 
-                                @if(Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                                @if(Auth::user()->can('staff.data.all'))
 
                                     <div class="form-group">
 
@@ -403,7 +408,7 @@
 
                                 </div>
 
-                                @if(Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                                @if(Auth::user()->can('staff.data.all'))
 
                                     <div class="form-group">
                                         <label>Status</label>
@@ -414,12 +419,11 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label> Assign Role <sup>*</sup></label>
-                                        <select class="ps-select  {{ $errors->has('assign_role') ? ' is-invalid' : '' }}" id="input-assign_role"  title="Role Name" name="assign_role" required aria-required="true">
-                                            <option value="" selected disabled>Assign Role</option>
+                                        <label> Assign Role(s) <sup>*</sup></label>
+                                        <select class="ps-select multiple-select w-100 {{ $errors->has('assign_role') ? ' is-invalid' : '' }}" id="input-assign_role"  title="Role Name" name="assign_role[]" multiple="multiple" required aria-required="true">
                                             @if(!empty($roles))
                                                 @foreach($roles as $role)
-                                                    <option value="{{ $role->id }}" {{ (old("assign_role" , $user->hasRole($role->id)) == $role->id ? "selected" : "" )}}>{{ $role->name }}</option>
+                                                    <option value="{{ $role->id }}" @if(in_array($role->id, (array) old('assign_role', $user->roles->pluck('id')->all()))) selected @endif>{{ $role->name }}</option>
                                                 @endforeach
                                             @endif
                                         </select>
@@ -534,8 +538,6 @@
 
 </div>
 
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-
 <script>
 
 jQuery(document).ready(function () {
@@ -573,6 +575,16 @@ jQuery(document).ready(function () {
     });
 
 });
+
+</script>
+
+<script>
+
+    $('.multiple-select').select2({
+        theme: 'bootstrap4',
+        width: '100%',
+        placeholder: 'Assign Role(s)'
+    });
 
 </script>
 

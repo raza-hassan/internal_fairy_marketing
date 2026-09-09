@@ -16,6 +16,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Clients;
 
 
+use App\Models\Number;
+
+
 use App\Models\LeadSource;
 
 
@@ -137,6 +140,11 @@ class ClientsController extends Controller {
 
 
             $clients->save();
+
+
+            if ($clients->phone != '' && !Number::where('number', 'like', '%' . $clients->phone . '%')->exists()) {
+                Number::insert(['number' => $clients->phone, 'type' => 'clients', 'client_id' => $clients->id]);
+            }
 
 
             return redirect('admin/clients')->withStatus(__('Client Created Successfully.'));

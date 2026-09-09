@@ -25,6 +25,11 @@ Route::get('/cache_clear', function () {
     return "Cache, View, Config, Optimize & Route All is cleared";
 });
 
+
+Route::get('/branch', function () {
+    return "Branch = Feature-Dynamic-Data";
+});
+
 Route::get('/run-migration', function () {
     Artisan::call('migrate', [
         '--force' => true,
@@ -42,7 +47,7 @@ Auth::routes();
 Route::get('admin/login', [App\Http\Controllers\Auth\LoginController::class, 'vip_login']);
 Route::get('admin/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout']);
 
-Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'role']], function () {
+Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin.access']], function () {
     Route::get('/', [App\Http\Controllers\admin\HomeController::class, 'index']);
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index']);
     Route::get('/managers', [App\Http\Controllers\UserController::class, 'accountant']);
@@ -218,7 +223,7 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function () {
     Route::put('/profile/password', [App\Http\Controllers\ProfileController::class, 'password']);
     Route::put('/user/password/{$user}', [App\Http\Controllers\outer\UserController::class, 'userpassword']);
 
-    Route::group(['middleware' => ['not_role_10']], function ()  // Role 10 Only Compain User
+    Route::group(['middleware' => ['exclude.marketing']], function ()  // hidden from the Digital Marketing role, which uses the Compain module instead
     {
         // Inventory
         Route::resource('inventory', App\Http\Controllers\ProductController::class);
@@ -243,7 +248,7 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function () {
         Route::post('get-inventory-orders', [App\Http\Controllers\ProductController::class, 'get_orders']);
 
 
-        Route::group(['middleware' => ['not_role_11']], function () // Role 11 Dealer User
+        Route::group(['middleware' => ['exclude.dealer']], function () // hidden from the Dealor role
         {
             // Clients
             Route::resource('/clients', App\Http\Controllers\ClientsController::class);
@@ -359,7 +364,7 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function () {
         });
 
 
-        Route::group(['middleware' => ['not_role_11', 'not_role_12']], function () // Role 12 Freelancer User && Role 11 Dealer User
+        Route::group(['middleware' => ['exclude.dealer', 'exclude.freelancer']], function () // hidden from Dealor and Freelancer roles
         {
             Route::get('facebookleads', [App\Http\Controllers\FacebookApiController::class, 'facebookleads']);
             Route::get('/user/create', [App\Http\Controllers\UserController::class, 'create']);
@@ -501,7 +506,7 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function () {
         });
     });
 
-    Route::group(['middleware' => ['role10']], function () {
+    Route::group(['middleware' => ['marketing.only']], function () { // Digital Marketing role only
         // Show Only Campains
         Route::resource('/compain', App\Http\Controllers\CompainController::class);
         Route::get('/compain/inactive/{id}', [App\Http\Controllers\CompainController::class, 'compainInActive']);

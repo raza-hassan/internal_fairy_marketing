@@ -80,14 +80,14 @@
                             </div>
                         </div>
 
-                        @if(Auth::user()->role != 11 && Auth::user()->role != 12 )
+                        @if(!Auth::user()->hasAnyRole(['Dealor', 'Freelancer']))
                             @if(count($users) > 0)
                                 <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                     <div class="form-group">
                                         <label>Allocation </label>
                                         <div class="bootstrap-select fm-cmp-mg">
                                             <select class="form-control" name="user_id" id="user_id">
-                                                @if (Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                                                @if (Auth::user()->can('client.data.all'))
                                                 <option value="0">All</option>
                                                 @endif
                                                 <?php
@@ -129,7 +129,7 @@
                             </div>
                         </div>
 
-                        @if(Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                        @if(Auth::user()->can('client.data.all'))
                             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                 <div class="form-group">
                                     <label>Offices </label>

@@ -5,7 +5,7 @@
                 <ul class="menu">
                     <li><a class="active" href="{{url('/')}}"><i class="icon-home"></i>Dashboard</a></li>
 
-                    @if(Auth::user()->role != 11 && Auth::user()->role != 12 )
+                    @if(!Auth::user()->hasAnyRole(['Dealor', 'Freelancer']))
                         <li><a href="{{url('inventory')}}"><i class="fa-solid fa-house-chimney-user"></i>Primary</a></li>
                         <li><a href="{{url('#')}}"><i class="fa-solid fa-hotel"></i>Secondary</a></li>
                     @endif

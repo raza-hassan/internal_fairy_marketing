@@ -8,6 +8,11 @@
 
 @include('users.sidebar')
 
+<link href="{{ asset('public/multiselect/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
+<link href="{{ asset('public/multiselect/plugins/select2/css/select2-bootstrap4.css') }}" rel="stylesheet" />
+<script src="{{ asset('public/multiselect/plugins/select2/js/select2.min.js') }}"></script>
+<script src="{{ asset('public/multiselect/js/jquery.min.js') }}"></script>
+
 <div class="ps-main__wrapper">
 
     <header class="header--dashboard">
@@ -42,7 +47,8 @@
 
     <section class="ps-new-item">
 
-        <form method="post" action="{{ url('user/store') }}" autocomplete="off" class="form-horizontal" enctype="multipart/form-data">
+        <form method="post" action="{{ url('user/store') }}" autocomplete="off" class="form-horizontal"
+            enctype="multipart/form-data">
 
             @csrf
 
@@ -66,11 +72,14 @@
 
                                     </label>
 
-                                    <input class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" name="name" id="input-name" type="text" placeholder="{{ __('Name') }}" value="{{ old('name') }}" required="true" aria-required="true"/>
+                                    <input class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}"
+                                        name="name" id="input-name" type="text" placeholder="{{ __('Name') }}"
+                                        value="{{ old('name') }}" required="true" aria-required="true" />
 
                                     @if ($errors->has('name'))
 
-                                    <span id="name-error" class="error text-danger" for="input-name">{{ $errors->first('name') }}</span>
+                                    <span id="name-error" class="error text-danger" for="input-name">{{
+                                        $errors->first('name') }}</span>
 
                                     @endif
 
@@ -82,7 +91,8 @@
 
                                     </label>
 
-                                    <input class="form-control" name="fname" type="text" placeholder="{{ __('Father Name') }}" value="{{ old('fname') }}"/>
+                                    <input class="form-control" name="fname" type="text"
+                                        placeholder="{{ __('Father Name') }}" value="{{ old('fname') }}" />
 
                                 </div>
 
@@ -90,7 +100,9 @@
 
                                     <label>Email<sup>*</sup></label>
 
-                                    <input class="form-control" name="email" id="input-email" type="email" placeholder="{{ __('Email') }}" value="{{ old('email') }}" required autocomplete="off"/>
+                                    <input class="form-control" name="email" id="input-email" type="email"
+                                        placeholder="{{ __('Email') }}" value="{{ old('email') }}" required
+                                        autocomplete="off" />
 
                                 </div>
 
@@ -114,7 +126,8 @@
 
                                     <label>Cnic ID<sup>*</sup></label>
 
-                                    <input class="form-control" name="cnic" type="text" placeholder="{{ __('CNIC') }}" value="{{ old('cnic') }}" required=""/>
+                                    <input class="form-control" name="cnic" type="text" placeholder="{{ __('CNIC') }}"
+                                        value="{{ old('cnic') }}" required="" />
 
                                 </div>
 
@@ -122,7 +135,8 @@
 
                                     <label>DOB<sup>*</sup></label>
 
-                                    <input class="form-control" id="datepicker" name="dob" type="text" placeholder="{{ __('Date Of Birth') }}" value="{{ old('dob') }}" required=""/>
+                                    <input class="form-control" id="datepicker" name="dob" type="text"
+                                        placeholder="{{ __('Date Of Birth') }}" value="{{ old('dob') }}" required="" />
 
 
 
@@ -134,7 +148,8 @@
 
                                     </label>
 
-                                    <input class="form-control" type="text" placeholder="Emergency Name" name="emgname" value="{{ old('emgname') }}"/>
+                                    <input class="form-control" type="text" placeholder="Emergency Name" name="emgname"
+                                        value="{{ old('emgname') }}" />
 
                                 </div>
 
@@ -144,7 +159,8 @@
 
                                     </label>
 
-                                    <input class="form-control" type="text" placeholder="Emergency Number" name="emgrnum" value="{{ old('emgrnum') }}"/>
+                                    <input class="form-control" type="text" placeholder="Emergency Number"
+                                        name="emgrnum" value="{{ old('emgrnum') }}" />
 
                                 </div>
 
@@ -154,7 +170,8 @@
 
                                     </label>
 
-                                    <input class="form-control" type="text" placeholder="Relation" name="emgrrelation" value="{{ old('emgrrelation') }}"/>
+                                    <input class="form-control" type="text" placeholder="Relation" name="emgrrelation"
+                                        value="{{ old('emgrrelation') }}" />
 
                                 </div>
 
@@ -164,11 +181,14 @@
 
                                     </label>
 
-                                    <input class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" input type="password" name="password" id="input-password" placeholder="{{ __('Password') }}" value="" required />
+                                    <input class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" input
+                                        type="password" name="password" id="input-password"
+                                        placeholder="{{ __('Password') }}" value="" required />
 
                                     @if ($errors->has('password'))
 
-                                    <span id="name-error" class="error text-danger" for="input-name">{{ $errors->first('password') }}</span>
+                                    <span id="name-error" class="error text-danger" for="input-name">{{
+                                        $errors->first('password') }}</span>
 
                                     @endif
 
@@ -180,7 +200,9 @@
 
                                     </label>
 
-                                    <input class="form-control" name="password_confirmation" id="input-password-confirmation" type="password" placeholder="{{ __('Confirm Password') }}" />
+                                    <input class="form-control" name="password_confirmation"
+                                        id="input-password-confirmation" type="password"
+                                        placeholder="{{ __('Confirm Password') }}" />
 
                                 </div>
 
@@ -202,19 +224,23 @@
 
                                     <label>Assign Manager<sup>*</sup></label>
 
-                                    <select class="ps-select  {{ $errors->has('parent') ? ' is-invalid' : '' }}" id="input-parent"  title="Status" name="parent" required="true" aria-required="true">
+                                    <select class="ps-select  {{ $errors->has('parent') ? ' is-invalid' : '' }}"
+                                        id="input-parent" title="Status" name="parent" required="true"
+                                        aria-required="true">
                                         <option value="" selected disabled>Select Manager</option>
                                         @if(!empty($managers))
-                                            @foreach($managers as $manager)
-                                            <option value="{{$manager->id}}" @if( old('parent') == $manager->id ) selected  @endif>{{$manager->name}}</option>
-                                            @endforeach
+                                        @foreach($managers as $manager)
+                                        <option value="{{$manager->id}}" @if( old('parent')==$manager->id ) selected
+                                            @endif>{{$manager->name}}</option>
+                                        @endforeach
                                         @endif
 
                                     </select>
 
                                     @if ($errors->has('parent'))
 
-                                    <span id="parent-error" class="error text-danger" for="input-parent">{{ $errors->first('name') }}</span>
+                                    <span id="parent-error" class="error text-danger" for="input-parent">{{
+                                        $errors->first('name') }}</span>
 
                                     @endif
 
@@ -224,11 +250,16 @@
 
                                     <label> Designation Name <sup>*</sup></label>
 
-                                    <input class="form-control{{ $errors->has('designation_name') ? ' is-invalid' : '' }}" name="designation_name" id="input-designation_name" type="text" placeholder="{{ __('Designation Name ') }}" value="{{ old('designation_name') }}" required aria-required="true"/>
+                                    <input
+                                        class="form-control{{ $errors->has('designation_name') ? ' is-invalid' : '' }}"
+                                        name="designation_name" id="input-designation_name" type="text"
+                                        placeholder="{{ __('Designation Name ') }}"
+                                        value="{{ old('designation_name') }}" required aria-required="true" />
 
                                     @if ($errors->has('designation_name'))
 
-                                        <span id="designation_name-error" class="error text-danger" for="input-designation_name">{{ $errors->first('name') }}</span>
+                                    <span id="designation_name-error" class="error text-danger"
+                                        for="input-designation_name">{{ $errors->first('name') }}</span>
 
                                     @endif
 
@@ -239,18 +270,21 @@
                                     <label> Account Type <sup>*</sup></label>
 
                                     <?php $auth_user = Auth::user(); ?>
-                                   <select class="ps-select  {{ $errors->has('role') ? ' is-invalid' : '' }}" id="input-role"  title="Status" name="role" required="" aria-required="true">
+                                    <select class="ps-select  {{ $errors->has('role') ? ' is-invalid' : '' }}"
+                                        id="input-role" title="Status" name="role" required="" aria-required="true">
                                         <option value="" selected disabled>Select Designation</option>
-                                            @foreach($designations as $designation)
-                                                @if ($designation->sequence_menu  >= $auth_user->designation->sequence_menu)
-                                                    <option value="{{$designation->id}}" @if(old('role')==$designation->id ) selected  @endif >{{$designation->name}}</option>
-                                                @endif
-                                            @endforeach
+                                        @foreach($designations as $designation)
+                                        @if ($designation->sequence_menu >= $auth_user->designation->sequence_menu)
+                                        <option value="{{$designation->id}}" @if(old('role')==$designation->id )
+                                            selected @endif >{{$designation->name}}</option>
+                                        @endif
+                                        @endforeach
                                     </select>
 
                                     @if ($errors->has('role'))
 
-                                    <span id="role-error" class="error text-danger" for="input-role">{{ $errors->first('name') }}</span>
+                                    <span id="role-error" class="error text-danger" for="input-role">{{
+                                        $errors->first('name') }}</span>
 
                                     @endif
 
@@ -262,13 +296,16 @@
 
                                     </label>
 
-                                    <select class="ps-select {{ $errors->has('department_id') ? ' is-invalid' : '' }}" id="input-department_id"  title="Status" name="department_id" required="" aria-required="true">
+                                    <select class="ps-select {{ $errors->has('department_id') ? ' is-invalid' : '' }}"
+                                        id="input-department_id" title="Status" name="department_id" required=""
+                                        aria-required="true">
 
                                         <option value="" selected disabled>Select Department</option>
 
                                         @foreach($departments as $department)
 
-                                        <option value="{{$department->id}}" @if(old('department_id')==$department->id) selected @endif>{{$department->name}}</option>
+                                        <option value="{{$department->id}}" @if(old('department_id')==$department->id)
+                                            selected @endif>{{$department->name}}</option>
 
                                         @endforeach
 
@@ -276,39 +313,44 @@
 
                                     @if ($errors->has('department_id'))
 
-                                    <span id="department_id-error" class="error text-danger" for="input-department_id">{{ $errors->first('name') }}</span>
+                                    <span id="department_id-error" class="error text-danger"
+                                        for="input-department_id">{{ $errors->first('name') }}</span>
 
                                     @endif
 
                                 </div>
 
-{{-- ======================================================================= --}}
+                                {{-- ======================================================================= --}}
 
-<div class="form-group" id="office_id">
+                                <div class="form-group" id="office_id">
 
-    <label> Assign Office <sup>*</sup></label>
+                                    <label> Assign Office <sup>*</sup></label>
 
-    <select class="ps-select  {{ $errors->has('office_id') ? ' is-invalid' : '' }}" id="input-office_id"  title="office Name" name="office_id" required aria-required="true">
+                                    <select class="ps-select  {{ $errors->has('office_id') ? ' is-invalid' : '' }}"
+                                        id="input-office_id" title="office Name" name="office_id" required
+                                        aria-required="true">
 
-        <option value="" selected disabled>Select Office</option>
+                                        <option value="" selected disabled>Select Office</option>
 
-            @foreach($offices as $office)
+                                        @foreach($offices as $office)
 
-                <option value="{{$office->id}}" @if(old('office_id')==$office->id ) selected  @endif >{{$office->name}}</option>
+                                        <option value="{{$office->id}}" @if(old('office_id')==$office->id ) selected
+                                            @endif >{{$office->name}}</option>
 
-            @endforeach
+                                        @endforeach
 
-    </select>
+                                    </select>
 
-    @if ($errors->has('office_id'))
+                                    @if ($errors->has('office_id'))
 
-    <span id="office_id-error" class="error text-danger" for="input-office_id">{{ $errors->first('name') }}</span>
+                                    <span id="office_id-error" class="error text-danger" for="input-office_id">{{
+                                        $errors->first('name') }}</span>
 
-    @endif
+                                    @endif
 
-</div>
+                                </div>
 
-{{-- ======================================================================= --}}
+                                {{-- ======================================================================= --}}
 
                                 <div class="form-group">
 
@@ -316,7 +358,8 @@
 
                                     </label>
 
-                                    <input class="form-control" type="text" placeholder="Enter Address" name="address" value="{{ old('address') }}"/>
+                                    <input class="form-control" type="text" placeholder="Enter Address" name="address"
+                                        value="{{ old('address') }}" />
 
                                 </div>
 
@@ -326,7 +369,8 @@
 
                                     </label>
 
-                                    <input class="form-control" type="text" placeholder="Enter Mobile" name="telephone1" value="{{ old('telephone1') }}" required=""/>
+                                    <input class="form-control" type="text" placeholder="Enter Mobile" name="telephone1"
+                                        value="{{ old('telephone1') }}" required="" />
 
                                 </div>
 
@@ -336,31 +380,34 @@
 
                                     </label>
 
-                                    <input class="form-control" type="text" placeholder="Enter Telephone" name="telephone2" value="{{ old('telephone2') }}"/>
+                                    <input class="form-control" type="text" placeholder="Enter Telephone"
+                                        name="telephone2" value="{{ old('telephone2') }}" />
 
                                 </div>
 
-                            <div class="form-group">
+                                <div class="form-group">
 
-                                <label>Sales Target
+                                    <label>Sales Target
 
-                                </label>
+                                    </label>
 
-                                <input class="form-control" type="text" placeholder="Enter Sales Target" name="sales_target"  value="{{ old('sales_target') }}"/>
+                                    <input class="form-control" type="text" placeholder="Enter Sales Target"
+                                        name="sales_target" value="{{ old('sales_target') }}" />
 
-                            </div>
+                                </div>
 
 
 
-                            <div class="form-group">
+                                <div class="form-group">
 
-                                <label>Unit Target
+                                    <label>Unit Target
 
-                                </label>
+                                    </label>
 
-                                <input class="form-control" type="text" placeholder="Enter Unit Target" name="unit_target"  value="{{ old('unit_target') }}"/>
+                                    <input class="form-control" type="text" placeholder="Enter Unit Target"
+                                        name="unit_target" value="{{ old('unit_target') }}" />
 
-                            </div>
+                                </div>
 
                                 <div class="form-group">
 
@@ -408,28 +455,34 @@
 
                                     <label>Status</label>
 
-                                        <div class="switch switch-lg switch-success">
+                                    <div class="switch switch-lg switch-success">
 
-                                            Enable: <input id="status" type="radio" name="status" data-plugin-ios-switch value="1" style="height: auto !important;"/>
+                                        Enable: <input id="status" type="radio" name="status" data-plugin-ios-switch
+                                            value="1" style="height: auto !important;" />
 
-                                            Disable: <input id="status" type="radio" name="status" data-plugin-ios-switch value="0" style="height: auto !important;"/>
+                                        Disable: <input id="status" type="radio" name="status" data-plugin-ios-switch
+                                            value="0" style="height: auto !important;" />
 
-                                        </div>
+                                    </div>
 
                                 </div>
 
                                 <div class="form-group">
-                                    <label> Assign Role <sup>*</sup></label>
-                                    <select class="ps-select  {{ $errors->has('assign_role') ? ' is-invalid' : '' }}" id="input-assign_role"  title="Role Name" name="assign_role" required aria-required="true">
-                                        <option value="" selected disabled>Assign Role</option>
+                                    <label> Assign Role(s) <sup>*</sup></label>
+                                    <select
+                                        class="ps-select multiple-select w-100 {{ $errors->has('assign_role') ? ' is-invalid' : '' }}"
+                                        id="input-assign_role" title="Role Name" name="assign_role[]"
+                                        multiple="multiple" required aria-required="true">
                                         @if(!empty($roles))
-                                            @foreach($roles as $role)
-                                                <option value="{{ $role->id }}" @if(old('assign_role')==$role->id) selected @endif>{{ $role->name }}</option>
-                                            @endforeach
+                                        @foreach($roles as $role)
+                                        <option value="{{ $role->id }}" @if(in_array($role->id, (array)
+                                            old('assign_role'))) selected @endif>{{ $role->name }}</option>
+                                        @endforeach
                                         @endif
                                     </select>
                                     @if ($errors->has('assign_role'))
-                                        <span id="assign_role-error" class="error text-danger" for="input-assign_role">{{ $errors->first('name') }}</span>
+                                    <span id="assign_role-error" class="error text-danger" for="input-assign_role">{{
+                                        $errors->first('name') }}</span>
                                     @endif
                                 </div>
 
@@ -457,11 +510,8 @@
 
 </div>
 
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-
 <script>
-
-jQuery(document).ready(function () {
+    jQuery(document).ready(function () {
 
     $.ajaxSetup({
 
@@ -499,10 +549,23 @@ jQuery(document).ready(function () {
 
 </script>
 
+<script>
+    $(window).on('load', function () {
+    $('.multiple-select').select2({
+        theme: 'bootstrap4',
+        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+        placeholder : "Assign Role(s)",
+        allowClear: Boolean($(this).data('allow-clear')),
+    });
+});
+</script>
+
+
+
+
 <script src="~/Scripts/jquery-1.10.2.js"></script>
 
 <script>
-
     $(function ()
 
     {
@@ -524,4 +587,3 @@ jQuery(document).ready(function () {
 
 
 @endsection
-

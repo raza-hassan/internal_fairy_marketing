@@ -79,7 +79,7 @@
                                 <label>Allocation </label>
                                 <div class="bootstrap-select fm-cmp-mg">
                                     <select class="form-control" name="user_id">
-                                        @if (Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+                                        @if (Auth::user()->can('affiliator.data.all'))
                                         <option value="0">All</option>
                                         @endif
                                         <?php
