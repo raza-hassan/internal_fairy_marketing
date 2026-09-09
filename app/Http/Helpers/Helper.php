@@ -50,7 +50,7 @@ class Helper
     public static function notificationsForCurrentUser($limit = 50)
     {
         $user = Auth::user();
-        $isPrivileged = in_array($user->role, [1, 5, 13, 14]);
+        $isPrivileged = $user->hasAnyRole(['Manager', 'Head-of-Sale', 'CEO', 'COO']);
 
         if ($isPrivileged) {
             $scope = function ($query) use ($user) {
@@ -138,32 +138,24 @@ class Helper
     {
         // echo"<pre>"; print_r($data); exit;
 
-        if ($data['role'] == 13)
-        {
-            $account = 'ceo';
-            $users = User::where('role', '!=', 0)->where('status', 1)->where('is_delete', 0)->orderBy('id', 'asc')->get();
-        }
-        elseif ($data['role'] == 14)
-        {
-            $account = 'coo';
-            $users = User::where('role', '!=', 0)->where('role', '!=', 13)->where('status', 1)->where('is_delete', 0)->orderBy('id', 'asc')->get();
-        }
-        elseif ($data['role'] == 5)
-        {
-            $account = 'hod';
-            $users = User::where('role', '!=', 0)->where('role', '!=', 13)->where('role', '!=', 14)->where('status', 1)->where('is_delete', 0)->orderBy('id', 'asc')->get();
-        }
-        else{
-            $account = 'user';
+        $currentUser = User::find($data['id']);
 
-            $users=User::where('status', 1)
-                        ->where('is_delete', 0)
-                        ->where(function ($query) use ($data)
-                        {
-                            $query->where('id', $data['id'])
-                                ->Orwhere('parent', $data['id']);
-                        })
-                        ->orderBy('id', 'asc')->get();
+        if ($currentUser && $currentUser->hasRole('CEO')) {
+            $account = 'ceo';
+        } elseif ($currentUser && $currentUser->hasRole('COO')) {
+            $account = 'coo';
+        } elseif ($currentUser && $currentUser->hasRole('Head-of-Sale')) {
+            $account = 'hod';
+        } else {
+            $account = 'user';
+        }
+
+        $staffVisibleIds = $currentUser ? $currentUser->visibleUserIds('staff') : [$data['id']];
+
+        if ($staffVisibleIds === null) {
+            $users = User::where('role', '!=', 0)->where('status', 1)->where('is_delete', 0)->orderBy('id', 'asc')->get();
+        } else {
+            $users = User::whereIn('id', $staffVisibleIds)->where('status', 1)->where('is_delete', 0)->orderBy('id', 'asc')->get();
         }
 
         $data = array(
@@ -178,32 +170,24 @@ class Helper
     {
         // echo"<pre>"; print_r($data); exit;
 
-        if ($data['role'] == 13)
-        {
-            $account = 'ceo';
-            $users = User::where('role', '!=', 0)->where('status', 0)->where('is_delete', 0)->orderBy('id', 'asc')->get();
-        }
-        elseif ($data['role'] == 14)
-        {
-            $account = 'coo';
-            $users = User::where('role', '!=', 0)->where('role', '!=', 13)->where('status', 0)->where('is_delete', 0)->orderBy('id', 'asc')->get();
-        }
-        elseif ($data['role'] == 5)
-        {
-            $account = 'hod';
-            $users = User::where('role', '!=', 0)->where('role', '!=', 13)->where('role', '!=', 14)->where('status', 0)->where('is_delete', 0)->orderBy('id', 'asc')->get();
-        }
-        else{
-            $account = 'user';
+        $currentUser = User::find($data['id']);
 
-            $users=User::where('status', 0)
-                        ->where('is_delete', 0)
-                        ->where(function ($query) use ($data)
-                        {
-                            $query->where('id', $data['id'])
-                                ->Orwhere('parent', $data['id']);
-                        })
-                        ->orderBy('id', 'asc')->get();
+        if ($currentUser && $currentUser->hasRole('CEO')) {
+            $account = 'ceo';
+        } elseif ($currentUser && $currentUser->hasRole('COO')) {
+            $account = 'coo';
+        } elseif ($currentUser && $currentUser->hasRole('Head-of-Sale')) {
+            $account = 'hod';
+        } else {
+            $account = 'user';
+        }
+
+        $staffVisibleIds = $currentUser ? $currentUser->visibleUserIds('staff') : [$data['id']];
+
+        if ($staffVisibleIds === null) {
+            $users = User::where('role', '!=', 0)->where('status', 0)->where('is_delete', 0)->orderBy('id', 'asc')->get();
+        } else {
+            $users = User::whereIn('id', $staffVisibleIds)->where('status', 0)->where('is_delete', 0)->orderBy('id', 'asc')->get();
         }
 
         $data = array(

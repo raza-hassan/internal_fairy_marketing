@@ -10,6 +10,8 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Affiliator;
 
+use App\Models\Number;
+
 use App\Models\User;
 
 use App\Models\Leads;
@@ -145,6 +147,13 @@ class AffiliatorsController extends Controller
                        'phone' => $request->countryCode . $request->phone
                            ]
            );
+
+           foreach ([$affiliator->phone, $affiliator->telephone, $affiliator->telephone1] as $number) {
+               if ($number != '' && !Number::where('number', 'like', '%' . $number . '%')->exists()) {
+                   Number::insert(['number' => $number, 'type' => 'affiliators', 'client_id' => $affiliator->id]);
+               }
+           }
+
            return redirect('admin/affiliators')->withStatus(__('Affiliator Created Successfully.'));
        } else {
            return back()->withInput()->withErrors(['Affiliator already exist']);

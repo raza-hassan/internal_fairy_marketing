@@ -184,13 +184,10 @@ class FacebookController extends Controller
 
                             foreach ($extractNumbers as $phoneNumber)
                             {
-                                // echo '+'.$phoneNumber; echo "<br>";exit;
-                                // $checkNumber = Number::where('number' , 'like', '%' . $phoneNumber . '%')->first();
-
-                                // if(empty($checkNumber))
-                                // {
+                                if (!Number::where('number', 'like', '%' . $phoneNumber . '%')->exists())
+                                {
                                     Number::insert([ 'number' => '+'.$phoneNumber, 'type' => 'clients', 'client_id' => $client->id,]);
-                                // }
+                                }
                             }
 
                             $counter++;
@@ -200,6 +197,18 @@ class FacebookController extends Controller
                             if (!empty($client))
                             {
                                 $record_exist[] = $client->id;
+
+                                // We only get here when $records (the numbers-table lookup) was empty,
+                                // so this client's number(s) are known to be missing from the table.
+                                // Still guard per-number: $records was checked against $processedNumbers,
+                                // which isn't guaranteed to be formatted identically to $extractNumbers.
+                                foreach ($extractNumbers as $phoneNumber)
+                                {
+                                    if (!Number::where('number', 'like', '%' . $phoneNumber . '%')->exists())
+                                    {
+                                        Number::insert([ 'number' => '+'.$phoneNumber, 'type' => 'clients', 'client_id' => $client->id,]);
+                                    }
+                                }
 
                                 $leads = Leads::where('client_id', $client['id'])->get();
 
@@ -213,16 +222,6 @@ class FacebookController extends Controller
                                         'office_id' => $client['office_id'],
                                         'added_by' => Auth::user()->id,
                                     ]);
-
-                                    foreach ($extractNumbers as $phoneNumber)
-                                    {
-                                        // $checkNumber = Number::where('number' , 'like', '%' . $phoneNumber . '%')->first();
-
-                                        // if(empty($checkNumber))
-                                        // {
-                                            Number::insert([ 'number' => '+'.$phoneNumber, 'type' => 'clients', 'client_id' => $client->id,]);
-                                        // }
-                                    }
 
                                     $counter++;
                                 }
@@ -377,9 +376,16 @@ class FacebookController extends Controller
                 // exit;
                 $campaign = Compain::where('form_id', $data['formid'])->first();
 
-                // $client = Clients::where('phone', $data['phonenumber'])->orWhere('email', $data['email'])->first();
-                $client=Number::Where('number', 'like', '%'.$data['phonenumber'].'%')->first();
+                // Look up the number table first, but always resolve back to the real Clients row
+                // (never trust the Number row's own id as if it were the client's id).
+                $numberRecord = Number::Where('number', 'like', '%'.$data['phonenumber'].'%')->where('type', 'clients')->first();
+                $client = $numberRecord ? Clients::find($numberRecord->client_id) : null;
 
+                if (empty($client)) {
+                    // Number entry may be missing even though the client already exists -
+                    // check the clients table directly so we don't create a duplicate.
+                    $client = Clients::where('phone', 'like', '%'.$data['phonenumber'].'%')->first();
+                }
 
                 if (empty($client) && !empty($campaign)) {
                     $client = Clients::firstOrCreate(
@@ -400,11 +406,15 @@ class FacebookController extends Controller
                     $counter++;
                 } else {
                     if (!empty($client) && !empty($campaign)) {
-                        $leads = Leads::where('client_id', $client['id'])->where('project_id', $campaign['project_id'])->get();
+                        if (!Number::where('number', 'like', '%'.$data['phonenumber'].'%')->exists()) {
+                            Number::insert(['number' => $data['phonenumber'], 'type' => 'clients', 'client_id' => $client->id]);
+                        }
+
+                        $leads = Leads::where('client_id', $client->id)->where('project_id', $campaign['project_id'])->get();
 
                         if (count($leads) < 1) {
 
-                            Leads::create(['client_id' => $client['id'], 'project_id' => $campaign['project_id'], 'source_id' => 3, 'user_id' => $client['user_id'], 'office_id' => $campaign['office_id']]);
+                            Leads::create(['client_id' => $client->id, 'project_id' => $campaign['project_id'], 'source_id' => 3, 'user_id' => $client->user_id, 'office_id' => $campaign['office_id']]);
                             $counter++;
                         }
                     }

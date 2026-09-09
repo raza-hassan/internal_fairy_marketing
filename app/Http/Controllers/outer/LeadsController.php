@@ -31,11 +31,13 @@ class LeadsController extends Controller {
 
         $sources = LeadSource::all();
 
-        if (Auth::user()->role == 5) {
+        if (Auth::user()->can('lead.data.all') || Auth::user()->hasRole(['Head of Sales', 'CEO', 'COO']))
+        {
             $users = User::where('role', '!=', 0)->orderBy('id', 'asc')->get();
         } else {
             $users = User::where('id', Auth::user()->id)->Orwhere('parent', Auth::user()->id)->orderBy('id', 'asc')->get();
         }
+
         $projects = Project::orderBy('id', 'ASC')->get();
         $search_person = 'user';
         $id = 0;
@@ -171,12 +173,10 @@ class LeadsController extends Controller {
 
     public function create()
     {
-        if (Auth::user()->role == 4 || Auth::user()->role == 1)
+        if (Auth::user()->can('lead.data.all') || Auth::user()->hasRole(['Manager', 'Affiliator', 'Head of Sales', 'CEO', 'COO']))
         {
             $sources = LeadSource::orderBy('id', 'desc')->get();
-        }
-        else
-        {
+        } else {
             $sources = LeadSource::where('subtype', 'user')->orderBy('id', 'desc')->get();
         }
 
@@ -476,11 +476,13 @@ class LeadsController extends Controller {
     }
 
     public function edit(Leads $lead) {
-        if (Auth::user()->role == 4 || Auth::user()->role == 1) {
+        if (Auth::user()->can('lead.data.all') || Auth::user()->hasRole(['Manager', 'Affiliator', 'Head of Sales', 'CEO', 'COO']))
+        {
             $sources = LeadSource::orderBy('id', 'desc')->get();
         } else {
             $sources = LeadSource::where('subtype', 'user')->orderBy('id', 'desc')->get();
         }
+
         if ($lead->user_id != Auth::user()->id && Auth::user()->role != 1 && Auth::user()->role != 5) {
             return back()->withErrors(__('Not Allowed!'));
         }

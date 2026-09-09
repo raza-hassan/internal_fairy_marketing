@@ -38,11 +38,14 @@ class ClientsController extends Controller {
     }
 
     public function create() {
-        if (Auth::user()->role == 4 || Auth::user()->role == 1) {
+
+        if (Auth::user()->can('client.data.all') || Auth::user()->hasRole(['Manager', 'Affiliator', 'Head of Sales', 'CEO', 'COO']))
+        {
             $sources = LeadSource::orderBy('id', 'desc')->get();
         } else {
             $sources = LeadSource::where('subtype', 'user')->orderBy('id', 'desc')->get();
         }
+
         return view('clients.create', compact('sources'));
     }
 

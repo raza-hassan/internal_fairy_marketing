@@ -252,7 +252,7 @@
                                         </a>
                                     @endif-->
 				{{-- ======================================================================================= --}}
-                                @if(Auth::user()->role == 1)
+                                @if(Auth::user()->hasRole('Manager'))
                                 {{--<a rel="tooltip" href="{{ url('lead/edit', $lead->id) }}" data-original-title="" title="">
                                 <i class="fa fa-edit" aria-hidden="true"></i>
                                 </a>--}}

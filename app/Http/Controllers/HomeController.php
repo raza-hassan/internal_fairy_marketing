@@ -44,7 +44,7 @@ class HomeController extends Controller {
         $projects = Project::orderBy('id', 'ASC')->get();
         $sources = LeadSource::all();
 
-	    if (Auth::user()->role == 10)
+	    if (Auth::user()->hasRole('Digital Marketing'))
         {
             $compains=Compain::all();
             return view('compain.index' , compact('compains'));
@@ -437,7 +437,7 @@ class HomeController extends Controller {
             $projects = Project::orderBy('id', 'ASC')->get();
             $sources = LeadSource::all();
 
-            if (Auth::user()->role == 10){
+            if (Auth::user()->hasRole('Digital Marketing')){
                 $compains=Compain::all();
                 return view('compain.index' , compact('compains'));
             }

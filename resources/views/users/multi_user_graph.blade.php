@@ -8,7 +8,7 @@
 
 
         <div class="container">
-            @if(Auth::user()->role == 1 || Auth::user()->role == 5 || Auth::user()->role == 13 || Auth::user()->role == 14)
+            @if(Auth::user()->can('staff.data.all'))
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 filter-sec" >
                     <form class="ps-form--filter" action="{{url('users/sorting')}}" method="post" >
                         @csrf

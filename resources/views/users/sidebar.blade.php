@@ -28,7 +28,7 @@
                             <li><a href="{{url('view-tree')}}"><i class="fa fa-tree" aria-hidden="true"></i>Staff Tree</a></li>
                         @endif
 
-                        @if(Auth::user()->role == 10)
+                        @if(Auth::user()->hasRole('Digital Marketing'))
                             <li><a href="{{url('/compain')}}"><i class="fa-solid fa-users-gear"></i>Compain</a></li>
                         @endif
 

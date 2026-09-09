@@ -200,7 +200,7 @@
                                         @endphp
 
                                         <select name="users[]" class="form-control multiple-select" id="select-tag" multiple="multiple" data-placeholder="Choose anything" >
-                                            @if (Auth::user()->role == 13 || Auth::user()->role == 14)
+                                            @if (Auth::user()->can('staff.data.all'))
                                                 <option {{ in_array('all_active_user', $selectedUserIds) ? 'selected' : '' }} value="all_active_user">All</option>
                                             @endif
                                             @foreach ($graph_users as $user)
