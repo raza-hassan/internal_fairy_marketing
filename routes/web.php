@@ -26,10 +26,6 @@ Route::get('/cache_clear', function () {
 });
 
 
-Route::get('/branch', function () {
-    return "Branch = Feature-Dynamic-Data";
-});
-
 Route::get('/run-migration', function () {
     Artisan::call('migrate', [
         '--force' => true,
