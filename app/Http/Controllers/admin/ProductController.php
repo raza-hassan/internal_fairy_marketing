@@ -142,20 +142,16 @@ class ProductController extends Controller {
 
     }
 
-    public function checkstatus() {
+    // public function checkstatus() {
 
-        $products = Product::where('status', 'Hold')->where('hold_status', 1)->whereDate('hold_expiary', '<=', Carbon::now()->timezone('Asia/Karachi'))->get();
+    //     $products = Product::where('status', 'Hold')->where('hold_status', 1)->whereDate('hold_expiary', '<=', Carbon::now()->timezone('Asia/Karachi'))->get();
 
-        foreach ($products as $product) {
+    //     foreach ($products as $product) {
 
-            $product->hold_status = 0;
+    //         $product->changeStatus('Available', ['hold_status' => 0], null, 'Auto-released: hold_expiary passed (checkstatus)');
 
-            $product->status = 'Available';
-
-            $product->save();
-
-        }
-    }
+    //     }
+    // }
 
     public function import() {
         return view('admin.products.import');

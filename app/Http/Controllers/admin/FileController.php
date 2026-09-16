@@ -121,7 +121,7 @@ class FileController extends Controller {
                     'status' => trim($data['status']),
                     'project_id' => 1,
                     'category_id' => $category_id,
-                    'hold_expiary' => '',
+                    'hold_expiary' => null,
                     'hold_status' => $hold_status,
                     'sold_by' => trim($data['inventorystatus']),
                 );

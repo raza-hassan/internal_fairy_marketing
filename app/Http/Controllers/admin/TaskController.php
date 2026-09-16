@@ -98,10 +98,10 @@ class TaskController extends Controller {
 
         if ($request->input('token') > 0 && $request->input('type') == 'Sales') {
             $product = Product::find($request->input('item_id'));
-            $product->status = 'Hold';
-            $product->hold_status = 1;
-            $product->hodl_expiary = date('Y-m-d', strtotime($Date . ' + 1 days'));
-            $product->save();
+            $product->changeStatus('Hold', [
+                'hold_status' => 1,
+                'hold_expiary' => date('Y-m-d', strtotime($Date . ' + 1 days')),
+            ], Auth::user()->id, 'Set via Task (Sales)');
         }
 
         return redirect()->back()->withStatus(__('Task Created Successfully.'));

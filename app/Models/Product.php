@@ -39,7 +39,9 @@ class Product extends Model
         'moninstallment',
         'description',
         'status',
-        'hodl_expiary',
+        'hold_expiary',
+        'held_at',
+        'hold_warning_sent_at',
         'hold_status',
         'sold_by',
         'discount',
@@ -66,6 +68,46 @@ class Product extends Model
     public function holded_by()
     {
         return $this->hasOne(User::class, 'id', 'hold_by');
+    }
+    public function statusHistory()
+    {
+        return $this->hasMany(ProductStatusHistory::class, 'product_id', 'id')->latest('created_at');
+    }
+
+    /**
+     * Single entry point for changing a unit's status so hold-tracking columns
+     * (held_at, hold_warning_sent_at) and product_status_history stay correct
+     * no matter which controller/command triggers the change.
+     */
+    public function changeStatus(string $newStatus, array $attributes = [], $changedBy = null, ?string $note = null): self
+    {
+        $previousStatus = $this->status;
+
+        $this->status = $newStatus;
+        foreach ($attributes as $key => $value) {
+            $this->{$key} = $value;
+        }
+
+        if ($newStatus === 'Hold') {
+            $this->held_at = now();
+            $this->hold_warning_sent_at = null;
+        } elseif ($previousStatus === 'Hold') {
+            $this->held_at = null;
+            $this->hold_warning_sent_at = null;
+        }
+
+        $this->save();
+
+        ProductStatusHistory::create([
+            'product_id' => $this->id,
+            'from_status' => $previousStatus,
+            'to_status' => $newStatus,
+            'changed_by' => $changedBy,
+            'note' => $note,
+            'created_at' => now(),
+        ]);
+
+        return $this;
     }
     public function leads()
     {

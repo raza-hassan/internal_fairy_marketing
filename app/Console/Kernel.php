@@ -15,10 +15,11 @@ class Kernel extends ConsoleKernel
      * @return void
      */
     protected $commands = [
-        Commands\FairyCron::class,
+        // Commands\FairyCron::class,
         Commands\DemoCron::class,
         Commands\TargetsCron::class,
         Commands\RefreshFacebookToken::class,
+        Commands\ProcessHoldExpiry::class,
 
     ];
 
@@ -45,6 +46,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('facebook:refresh-token')->daily();
         $schedule->command('targets:cron')->daily();
+        $schedule->command('inventory:process-hold-expiry')->daily()
+            ->appendOutputTo(storage_path('logs/process-hold-expiry.log'));
     }
 
 
