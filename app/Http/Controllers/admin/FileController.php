@@ -88,11 +88,6 @@ class FileController extends Controller {
                 $pricepsft = str_replace(',', '', $data['pricepsft']);
                 $carea = str_replace(',', '', $data['coveredarea']);
                 $grossarea = str_replace(',', '', $data['grossarea']);
-                if($data['status'] == 'Available'){
-                    $hold_status = 0;
-                }else{
-                    $hold_status = 1;
-                }
                 $records = array();
                 $records = array(
                     'name' => $name,
@@ -121,11 +116,19 @@ class FileController extends Controller {
                     'status' => trim($data['status']),
                     'project_id' => 1,
                     'category_id' => $category_id,
-                    'hold_expiary' => null,
-                    'hold_status' => $hold_status,
                     'sold_by' => trim($data['inventorystatus']),
                 );
-                array_filter($records);
+                // Import ko pata nahi hota ke unit kis staff member ne hold ki -
+                // is liye sirf 'Available' par hold clear karte hain. Kisi aur
+                // status (Token/Hold/Reserved/...) ke liye hold_status/hold_by/
+                // hold_expiary ko chhedte nahi, taake Task/existence se set ki
+                // hui real hold info import se overwrite na ho (aur naye/import
+                // se bane products par false hold_status=1 na lage).
+                if (trim($data['status']) == 'Available') {
+                    $records['hold_status'] = 0;
+                    $records['hold_by'] = 0;
+                    $records['hold_expiary'] = null;
+                }
                 if ($product === null) {
                     Product::create($records);
                 } else {

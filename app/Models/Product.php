@@ -40,7 +40,6 @@ class Product extends Model
         'description',
         'status',
         'hold_expiary',
-        'held_at',
         'hold_warning_sent_at',
         'hold_status',
         'sold_by',
@@ -76,8 +75,9 @@ class Product extends Model
 
     /**
      * Single entry point for changing a unit's status so hold-tracking columns
-     * (held_at, hold_warning_sent_at) and product_status_history stay correct
-     * no matter which controller/command triggers the change.
+     * (hold_warning_sent_at) and product_status_history stay correct no matter
+     * which controller/command triggers the change. Expiry itself is driven by
+     * hold_expiary (set when a unit goes on Hold), not by this method.
      */
     public function changeStatus(string $newStatus, array $attributes = [], $changedBy = null, ?string $note = null): self
     {
@@ -88,11 +88,7 @@ class Product extends Model
             $this->{$key} = $value;
         }
 
-        if ($newStatus === 'Hold') {
-            $this->held_at = now();
-            $this->hold_warning_sent_at = null;
-        } elseif ($previousStatus === 'Hold') {
-            $this->held_at = null;
+        if ($newStatus == 'Hold' || $previousStatus == 'Hold') {
             $this->hold_warning_sent_at = null;
         }
 
