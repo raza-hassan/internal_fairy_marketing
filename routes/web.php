@@ -126,7 +126,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin.access']], fu
     Route::put('inventory/update/{product}', [App\Http\Controllers\admin\ProductController::class, 'update']);
     Route::delete('inventory/destroy/{product}', [App\Http\Controllers\admin\ProductController::class, 'destroy']);
     Route::get('inventory-search', [App\Http\Controllers\admin\ProductController::class, 'search']);
-    Route::get('inventory/status', [App\Http\Controllers\admin\ProductController::class, 'checkstatus'])->name('change-status');
+    // Route::get('inventory/status', [App\Http\Controllers\admin\ProductController::class, 'checkstatus'])->name('change-status');
     Route::get('inventory/import', [App\Http\Controllers\admin\ProductController::class, 'import'])->name('file-import');
 
     // Affiliators
@@ -352,7 +352,7 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function () {
 
             Route::post('file-import', [App\Http\Controllers\admin\FileController::class, 'fileImport'])->name('file-import');
             Route::get('file-export', [App\Http\Controllers\admin\FileController::class, 'fileExport'])->name('file-export');
-            Route::get('check-status', [App\Http\Controllers\ProductController::class, 'checkstatus']);
+            // Route::get('check-status', [App\Http\Controllers\ProductController::class, 'checkstatus']);
             Route::get('office-users-get/{office_id}', [App\Http\Controllers\LeadsController::class, 'office_users_get']);
 
             Route::get('client-leads-import', [App\Http\Controllers\FacebookController::class, 'clientsImport']);

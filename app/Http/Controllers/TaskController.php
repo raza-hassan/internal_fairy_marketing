@@ -241,36 +241,36 @@ class TaskController extends Controller
                 return redirect()->back()->withErrors(__('Token amount should be greater than or equal to '.$discount->token_amount.' atleast.'));
             } else {
 
-                if ($request->input('token_amount') >= $discount->token_amount && $request->input('token_amount') <= 30000) {
-                    $expiary_date = date('Y-m-d H:i:s', strtotime("+5 days"));
-                } elseif ($request->input('token_amount') >= 100000) {
-                    $expiary_date = date('Y-m-d H:i:s', strtotime("+10 days"));
+                // Default to +7 days so $expiary_date is always defined, even for
+                // token amounts that fall between the two named brackets below.
+                $expiary_date = date('Y-m-d H:i:s', strtotime("+7 days"));
+                if ($request->input('token_amount') >= 100000) {
+                    $expiary_date = date('Y-m-d H:i:s', strtotime("+14 days"));
                 }
                 // echo $expiary_date; exit;
 
                 // $product = Product::find($request->input('unit_id'));
                 $product = Product::where('unitid' , $request->input('unit_id'))->first();
-                $product->status = $status;
-                $product->hold_by = $request->input('added_by');
-                $product->sold_by = 'Hold by Fairymarketing';
-                $expiary_date = date('Y-m-d H:i:s');
-                $product->hold_expiary = $expiary_date;
-                $product->hold_status = 1;
-                $product->sold_at = Carbon::now();
-                $product->save();
+                $product->changeStatus($status, [
+                    'hold_by' => $request->input('added_by'),
+                    'sold_by' => 'Hold by Fairymarketing',
+                    'hold_expiary' => $expiary_date,
+                    'hold_status' => 1,
+                    'sold_at' => Carbon::now(),
+                ], $request->input('added_by'), 'Set via Task (' . $request->input('subtype') . ')');
 
                 $orderdata = array(
-                                'unit_id'=>$request->input('unit_id'),
-                                'user_id'=>$request->input('added_by'),
-                                'lead_id'=> $request->input('lead_id'),
-                                'status'=>'Hold',
-                                'discount'=>$request->input('deal_price'),
-                                'price'=>$product->price,
-                                'token'=>$request->input('token_amount'),
-                                'token_received'=>$request->input('token_amount'),
-                                'client_id'=>$request->input('client_id'),
-                                'approved_by'=>0,
-                            );
+                    'unit_id'=>$request->input('unit_id'),
+                    'user_id'=>$request->input('added_by'),
+                    'lead_id'=> $request->input('lead_id'),
+                    'status'=>'Hold',
+                    'discount'=>$request->input('deal_price'),
+                    'price'=>$product->price,
+                    'token'=>$request->input('token_amount'),
+                    'token_received'=>$request->input('token_amount'),
+                    'client_id'=>$request->input('client_id'),
+                    'approved_by'=>0,
+                );
 
                 $order=Order::create($orderdata);
 
@@ -329,13 +329,13 @@ class TaskController extends Controller
         Task::where('lead_id', $request->input('lead_id'))
             ->where('client_id', $request->input('client_id'))
             ->where('status', 0)->update([
-                                            'status' => 1
-                                        ]);
+                'status' => 1
+            ]);
 
         $task = Task::create($request->merge([
-                                            'deadline' => $deadline,
-                                            'completion_date' => $completion_date,
-                                        ])->all());
+            'deadline' => $deadline,
+            'completion_date' => $completion_date,
+        ])->all());
 
 
         $filePath = '';
