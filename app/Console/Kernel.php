@@ -44,9 +44,10 @@ class Kernel extends ConsoleKernel
             ->everyThirtyMinutes()
             ->appendOutputTo(storage_path('logs/stagging-cron.log'));
 
-        $schedule->command('facebook:refresh-token')->daily();
+        // $schedule->command('facebook:refresh-token')->daily();
         $schedule->command('targets:cron')->daily();
-        $schedule->command('inventory:process-hold-expiry')->daily()
+        $schedule->command('inventory:process-hold-expiry')
+            ->twiceDaily(0, 12) // This runs at: // 00:00 → 12 AM 12:00 → 12 PM
             ->appendOutputTo(storage_path('logs/process-hold-expiry.log'));
     }
 
