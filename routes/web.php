@@ -145,6 +145,11 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin.access']], fu
     //  Route::resource('/settings', App\Http\Controllers\admin\SettingController::class);
     Route::get('/settings', [App\Http\Controllers\admin\SettingController::class, 'index']);
 
+    // Facebook Access Token
+    Route::get('/facebook-token', [App\Http\Controllers\FacebookApiController::class, 'index']);
+    Route::post('/facebook-token/update', [App\Http\Controllers\FacebookApiController::class, 'updateToken']);
+    Route::post('/facebook-token/refresh', [App\Http\Controllers\FacebookApiController::class, 'refreshNow']);
+
     //  Lead Status
     Route::get('/status', [App\Http\Controllers\admin\LeadStatusController::class, 'index']);
     Route::get('/status/create', [App\Http\Controllers\admin\LeadStatusController::class, 'create']);
@@ -200,11 +205,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin.access']], fu
 
     // Company
     Route::resource('/company', App\Http\Controllers\admin\CompanyController::class);
-
-
-    // //Facebook leads Api
-    // Route::get('facebook_access_token', [App\Http\Controllers\FacebookApiController::class, 'access_token']);
-
 
 });
 
@@ -338,10 +338,6 @@ Route::group(['middleware' => ['auth', 'checkStatus']], function () {
             Route::post('lead/report', [App\Http\Controllers\ReportController::class, 'search']);
             Route::get('facebook-leads-import', [App\Http\Controllers\FacebookController::class, 'facebookImport']);
             Route::post('facebook-leads-store', [App\Http\Controllers\FacebookController::class, 'facebookfileImportInstantForm']);
-
-            //Facebook leads Api
-            Route::get('facebook_access_token', [App\Http\Controllers\FacebookApiController::class, 'access_token']);
-
 
             Route::get('file-import-inventory', [App\Http\Controllers\admin\FileController::class, 'fileImportExport']);
             Route::post('inventory-sizes-update', [App\Http\Controllers\admin\FileController::class, 'sizesFileImport']);
@@ -609,7 +605,3 @@ Route::get('corner/product/prices', [App\Http\Controllers\Controller::class, 'up
 
 
 // ^(\s)*$\n
-
-
-// //Facebook leads Api
-// Route::get('facebook_access_token', [App\Http\Controllers\FacebookApiController::class, 'access_token']);
