@@ -97,11 +97,18 @@ class TaskController extends Controller {
         $lead->save();
 
         if ($request->input('token') > 0 && $request->input('type') == 'Sales') {
+            // Default 7 days; 14 days when the token amount is 100000 or more.
+            $expiary_date = date('Y-m-d H:i:s', strtotime('+7 days'));
+            if ($request->input('token') >= 100000) {
+                $expiary_date = date('Y-m-d H:i:s', strtotime('+14 days'));
+            }
+
             $product = Product::find($request->input('item_id'));
-            $product->status = 'Hold';
-            $product->hold_status = 1;
-            $product->hodl_expiary = date('Y-m-d', strtotime($Date . ' + 1 days'));
-            $product->save();
+            $product->changeStatus('Hold', [
+                'hold_status' => 1,
+                'hold_expiary' => $expiary_date,
+                'hold_by' => $request->input('added_by') ?? 0,
+            ], Auth::user()->id, 'Set via Task (Sales)');
         }
 
         return redirect()->back()->withStatus(__('Task Created Successfully.'));

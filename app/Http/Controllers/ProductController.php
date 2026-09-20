@@ -18,15 +18,13 @@ use App\Services\ProductImportService;
 
 class ProductController extends Controller
 {
-    public function checkstatus() {
-        $products = Product::where('status', 'Hold')->where('hold_status', 1)->whereDate('hold_expiary', '<=', Carbon::now()->timezone('Asia/Karachi'))->get();
+    // public function checkstatus() {
+    //     $products = Product::where('status', 'Hold')->where('hold_status', 1)->whereDate('hold_expiary', '<=', Carbon::now()->timezone('Asia/Karachi'))->get();
 
-        foreach ($products as $product) {
-            $product->hold_status = 0;
-            $product->status = 'Available';
-            $product->save();
-        }
-    }
+    //     foreach ($products as $product) {
+    //         $product->changeStatus('Available', ['hold_status' => 0], null, 'Auto-released: hold_expiary passed (checkstatus)');
+    //     }
+    // }
 
     public function index()
     {
@@ -682,17 +680,19 @@ class ProductController extends Controller
             ]);
 
 
-            Product::where('id', $request->product_id)
-                    ->update([
-                        'hold_by' => $hold_by,
-                        'hold_expiary' => $date,
-                        'hold_status' => $hold_status,
-                        'status' =>  $request->status,
-                        'sold_by' =>  $sold_by,
-                        'is_approved' => $is_approved,
-                        'approved_by' => $approved_by,
-                        'sold_at' => Carbon::now(),
-            ]);
+            $product = Product::where('id', $request->product_id)->first();
+            if (!$product) {
+                return redirect()->back()->withErrors(__('Unit not found.'));
+            }
+            $product->changeStatus($request->status, [
+                'hold_by' => $hold_by,
+                'hold_expiary' => $date,
+                'hold_status' => $hold_status,
+                'sold_by' => $sold_by,
+                'is_approved' => $is_approved,
+                'approved_by' => $approved_by,
+                'sold_at' => Carbon::now(),
+            ], Auth::user()->id, 'Set via existence/store');
             return redirect('inventory')->withStatus(__('Submitted Successfully.'));
         }
         else{
@@ -835,17 +835,15 @@ class ProductController extends Controller
                 $order->status= $order_status;
                 $order->save();
             }
-            Product::where('id', $request->product_id)
-                ->update([
-                    'hold_by' => $hold_by,
-                    'hold_expiary' => $date,
-                    'hold_status' => $hold_status,
-                    'status' =>  $status,
-                    'sold_by' =>  $sold_by,
-                    'is_approved' => $is_approved,
-                    'approved_by' => $approved_by,
-                    'sold_at' => $sold_at,
-            ]);
+            $product->changeStatus($status, [
+                'hold_by' => $hold_by,
+                'hold_expiary' => $date,
+                'hold_status' => $hold_status,
+                'sold_by' => $sold_by,
+                'is_approved' => $is_approved,
+                'approved_by' => $approved_by,
+                'sold_at' => $sold_at,
+            ], Auth::user()->id, $request->is_approved == 1 ? 'Approved via inventory approval' : 'Rejected via inventory approval');
             ProductNotes::insert([
                 'note' => $request->note,
                 'status' => $status,
