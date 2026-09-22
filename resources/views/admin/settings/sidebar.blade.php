@@ -18,6 +18,7 @@
                     <li><a href="{{url('/admin/offices')}}"><i class="fa fa-life-ring" aria-hidden="true"></i>Offices</a></li>
                     <li><a href="{{url('/admin/compain')}}"><i class="fa fa-creative-commons" aria-hidden="true"></i>Compains</a></li>
                     <li><a href="{{url('/admin/company')}}"><i class="fa fa-creative-commons" aria-hidden="true"></i>Comapnies</a></li>
+                    <li><a href="{{url('/admin/facebook-token')}}"><i class="fa fa-facebook-official" aria-hidden="true"></i>Facebook Token</a></li>
 
                 </ul>
             </div>
