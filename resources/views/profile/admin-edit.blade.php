@@ -19,22 +19,39 @@
                 </div>
                 @endif
                 <div class="panel-body">
+                    @if ($selfRestricted)
+                        <div class="alert alert-info">{{ __('Name and email are locked on your own account. Contact your senior to change them.') }}</div>
+                        <style>
+                            .field-locked-badge {
+                                display: inline-block;
+                                margin-left: 6px;
+                                padding: 1px 6px;
+                                font-size: 11px;
+                                font-weight: normal;
+                                color: #856404;
+                                background-color: #fff3cd;
+                                border: 1px solid #ffeeba;
+                                border-radius: 3px;
+                                vertical-align: middle;
+                            }
+                        </style>
+                    @endif
                     <form method="post" action="{{ url('profile/update') }}" autocomplete="off" class="form-horizontal">
                         @csrf
                         @method('put')
                         <div class="form-group">
-                            <label class="col-md-3 control-label" for="inputPlaceholder">Name</label>
+                            <label class="col-md-3 control-label" for="inputPlaceholder">Name @if($selfRestricted)<span class="field-locked-badge">🔒 Locked</span>@endif</label>
                             <div class="col-md-6">
-                                <input class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" name="name" id="input-name" type="text" placeholder="{{ __('Name') }}" value="{{ old('name', $user->name) }}" required="true" aria-required="true"/>
+                                <input class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" name="name" id="input-name" type="text" placeholder="{{ __('Name') }}" value="{{ old('name', $user->name) }}" required="true" aria-required="true" @disabled($selfRestricted)/>
                                 @if ($errors->has('name'))
                                 <span id="name-error" class="error text-danger" for="input-name">{{ $errors->first('name') }}</span>
                                 @endif
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-3 control-label" for="inputPlaceholder">Email</label>
+                            <label class="col-md-3 control-label" for="inputPlaceholder">Email @if($selfRestricted)<span class="field-locked-badge">🔒 Locked</span>@endif</label>
                             <div class="col-md-6">
-                                <input class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" id="input-name" type="email" placeholder="{{ __('Email') }}" value="{{ old('email', $user->email) }}" required="true" aria-required="true"/>
+                                <input class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" id="input-name" type="email" placeholder="{{ __('Email') }}" value="{{ old('email', $user->email) }}" required="true" aria-required="true" @disabled($selfRestricted)/>
                                 @if ($errors->has('email'))
                                 <span id="name-error" class="error text-danger" for="input-name">{{ $errors->first('email') }}</span>
                                 @endif

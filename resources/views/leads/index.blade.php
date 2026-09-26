@@ -105,9 +105,7 @@
                                                                 $user_id = Auth::user()->id;
                                                             }
                                                         ?>
-                                                        @foreach($allocation as $user)
-                                                            <option <?php if($user_id == $user->id){ echo 'selected'; } ?> value="{{$user->id}}">{{$user->name}}</option>
-                                                        @endforeach
+                                                        @include('partials.allocation-options', ['users' => $allocation ?? $users, 'selected' => $user_id])
                                                     </select>
                                                 </div>
                                             </div>

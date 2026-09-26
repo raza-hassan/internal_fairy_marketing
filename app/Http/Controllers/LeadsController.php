@@ -59,7 +59,7 @@ class LeadsController extends Controller
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', 1);
+            $users = Helper::scopeToOffice($responce['users'], 1);
             $allocation = $users;
             // ====== Users With Helper======
 
@@ -279,7 +279,7 @@ class LeadsController extends Controller
             'role' => Auth::user()->role,
         );
         $responce = Helper::users($data);
-        $users = $responce['users']->where('office_id', 1);
+        $users = Helper::scopeToOffice($responce['users'], 1);
         $allocation = $users;
         // ====== Users With Helper======
 
@@ -368,7 +368,7 @@ class LeadsController extends Controller
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', Auth::user()->office_id);
+            $users = Helper::scopeToOffice($responce['users'], Auth::user()->office_id);
             // ====== Users With Helper======
             return view('leads.facebookleads', compact('leads', 'users'));
         } else {
@@ -1187,7 +1187,7 @@ class LeadsController extends Controller
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', 1);
+            $users = Helper::scopeToOffice($responce['users'], 1);
             $allocation = $users;
             // ====== Users With Helper======
 
@@ -1683,10 +1683,7 @@ class LeadsController extends Controller
         if (count($users) > 0) {
             // $html.='<select class="form-control user_id" name="user_id" id="user_id">';
             $html .= '<option value="0"> All </option>';
-
-            foreach ($users as $user) {
-                $html .= '<option value="' . $user->id . '"> ' . $user->name . '</option>';
-            }
+            $html .= view('partials.allocation-options', ['users' => $users])->render();
             // $html.= '</select>';
         } else {
             $html .= '<p>Sorry No Record Found...!</p>';
