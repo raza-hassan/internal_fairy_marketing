@@ -61,6 +61,24 @@
 
     </header>
 
+    @if ($selfRestricted ?? false)
+    <div class="alert alert-info">{{ __('Some fields are locked on your account — contact your senior to make changes. You can still update your contact information, profile picture, and password.') }}</div>
+    <style>
+        .field-locked-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 6px;
+            font-size: 11px;
+            font-weight: normal;
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 3px;
+            vertical-align: middle;
+        }
+    </style>
+    @endif
+
     <section class="ps-new-item">
 
         <form method="post" action="{{ url('user/update',$user) }}" autocomplete="off" class="form-horizontal" enctype="multipart/form-data">
@@ -84,10 +102,10 @@
                                 <div class="form-group">
 
                                     <label>Name<sup>*</sup>
-
+                                        @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif
                                     </label>
 
-                                    <input class="form-control" name="name" type="text" placeholder="{{ __('Name') }}" value="{{ old('name', $user->name) }}" required="true" aria-required="true"/>
+                                    <input class="form-control" name="name" type="text" placeholder="{{ __('Name') }}" value="{{ old('name', $user->name) }}" required="true" aria-required="true" @disabled($selfRestricted ?? false)/>
 
                                     @if ($errors->has('name'))
 
@@ -100,20 +118,20 @@
                                 <div class="form-group">
 
                                     <label>Father Name / Husband Name
-
+                                        @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif
                                     </label>
 
-                                    <input class="form-control" name="fname" type="text" placeholder="{{ __('Father Name') }}" value="{{ old('fname', $user->fname) }}"/>
+                                    <input class="form-control" name="fname" type="text" placeholder="{{ __('Father Name') }}" value="{{ old('fname', $user->fname) }}" @disabled($selfRestricted ?? false)/>
 
                                 </div>
 
                                 <div class="form-group">
 
                                     <label>Email<sup>*</sup>
-
+                                        @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif
                                     </label>
 
-                                    <input class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" id="input-email" type="email" placeholder="{{ __('Email') }}" value="{{ old('email', $user->email) }}" autocomplete="off" required />
+                                    <input class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" id="input-email" type="email" placeholder="{{ __('Email') }}" value="{{ old('email', $user->email) }}" autocomplete="off" required @disabled($selfRestricted ?? false)/>
 
                                     @if ($errors->has('email'))
 
@@ -126,10 +144,10 @@
                                 <div class="form-group">
 
                                     <label>Gender
-
+                                        @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif
                                     </label>
 
-                                    <select class="ps-select" title="Status" name="gender">
+                                    <select class="ps-select" title="Status" name="gender" @disabled($selfRestricted ?? false)>
 
                                         <option value="Male">Select Type</option>
 
@@ -160,48 +178,48 @@
                                 <div class="form-group">
 
                                     <label>Cnic ID<sup>*</sup>
-
+                                        @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif
                                     </label>
 
-                                    <input class="form-control" name="cnic" type="text" placeholder="{{ __('CNIC') }}" value="{{ old('cnic', $user->cnic) }}" required=""/>
+                                    <input class="form-control" name="cnic" type="text" placeholder="{{ __('CNIC') }}" value="{{ old('cnic', $user->cnic) }}" required="" @disabled($selfRestricted ?? false)/>
 
                                 </div>
 
                                 <div class="form-group">
 
                                     <label>DOB
-
+                                        @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif
                                     </label>
 
-                                    <input class="form-control datepicker" name="dob" type="text" placeholder="{{ __('Date Of Birth') }}" value="{{ old('dob', $user->dob) }}"/>
+                                    <input class="form-control datepicker" name="dob" type="text" placeholder="{{ __('Date Of Birth') }}" value="{{ old('dob', $user->dob) }}" @disabled($selfRestricted ?? false)/>
 
                                 </div>
 
                                 <div class="form-group">
 
-                                    <label>Emergency Name<sup>*</sup></label>
+                                    <label>Emergency Name<sup>*</sup> @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif</label>
 
-                                    <input class="form-control" type="text" placeholder="Emergency Name" name="emgname" value="{{ old('emgname', $user->emgname) }}" required=""/>
+                                    <input class="form-control" type="text" placeholder="Emergency Name" name="emgname" value="{{ old('emgname', $user->emgname) }}" required="" @disabled($selfRestricted ?? false)/>
 
                                 </div>
 
                                 <div class="form-group">
 
                                     <label>Emergency Number<sup>*</sup>
-
+                                        @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif
                                     </label>
 
-                                    <input class="form-control" type="text" placeholder="Emergency Number" name="emgrnum" value="{{ old('emgrnum', $user->emgrnum) }}" required=""/>
+                                    <input class="form-control" type="text" placeholder="Emergency Number" name="emgrnum" value="{{ old('emgrnum', $user->emgrnum) }}" required="" @disabled($selfRestricted ?? false)/>
 
                                 </div>
 
                                 <div class="form-group">
 
                                     <label>Relation<sup>*</sup>
-
+                                        @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif
                                     </label>
 
-                                    <input class="form-control" type="text" placeholder="Relation" name="emgrrelation" value="{{ old('emgrrelation', $user->emgrrelation) }}" required=""/>
+                                    <input class="form-control" type="text" placeholder="Relation" name="emgrrelation" value="{{ old('emgrrelation', $user->emgrrelation) }}" required="" @disabled($selfRestricted ?? false)/>
 
                                 </div>
 
@@ -223,7 +241,7 @@
 
                                     <div class="form-group">
 
-                                        <label>Assign Manager<sup>*</sup></label>
+                                        <label>Assign Manager<sup>*</sup> @if(Auth::user()->id == $user->id)<span class="field-locked-badge">🔒 Locked</span>@endif</label>
 
                                         <select class="ps-select  {{ $errors->has('parent') ? ' is-invalid' : '' }}" id="input-parent"  title="Status" name="parent" required="" aria-required="true" @if (Auth::user()->id == $user->id) @disabled(true) @endif>
                                             <option selected disabled>Select Manager</option>
@@ -249,17 +267,17 @@
                                     </div>
 
                                     <div class="form-group" id="manager">
-                                        <label> Designation Name <sup>*</sup></label>
-                                        <input class="form-control{{ $errors->has('designation_name') ? ' is-invalid' : '' }}" name="designation_name" id="input-designation_name" type="text" placeholder="{{ __('Designation Name ') }}" value="{{$user->designation_name}}"  aria-required="true"/>
+                                        <label> Designation Name <sup>*</sup> @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif</label>
+                                        <input class="form-control{{ $errors->has('designation_name') ? ' is-invalid' : '' }}" name="designation_name" id="input-designation_name" type="text" placeholder="{{ __('Designation Name ') }}" value="{{$user->designation_name}}"  aria-required="true" @disabled($selfRestricted ?? false)/>
                                         @if ($errors->has('designation_name'))
                                             <span id="designation_name-error" class="error text-danger" for="input-designation_name">{{ $errors->first('name') }}</span>
                                         @endif
                                     </div>
 
                                     <div class="form-group" id="manager">
-                                        <label>Account Tpye<sup>*</sup></label>
+                                        <label>Account Tpye<sup>*</sup> @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif</label>
                                         <?php $auth_user = Auth::user(); ?>
-                                        <select class="ps-select  {{ $errors->has('role') ? ' is-invalid' : '' }}" id="input-role"  title="Status" name="role" required="" aria-required="true">
+                                        <select class="ps-select  {{ $errors->has('role') ? ' is-invalid' : '' }}" id="input-role"  title="Status" name="role" required="" aria-required="true" @disabled($selfRestricted ?? false)>
                                             <option selected disabled>Select Designation</option>
                                                 @foreach($designations as $designation)
                                                     @if ($designation->sequence_menu  >= $auth_user->designation->sequence_menu)
@@ -275,10 +293,10 @@
                                     <div class="form-group">
 
                                         <label>Department<sup>*</sup>
-
+                                            @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif
                                         </label>
 
-                                        <select class="ps-select {{ $errors->has('department_id') ? ' is-invalid' : '' }}" id="input-department_id"  title="Status" name="department_id" required="" aria-required="true">
+                                        <select class="ps-select {{ $errors->has('department_id') ? ' is-invalid' : '' }}" id="input-department_id"  title="Status" name="department_id" required="" aria-required="true" @disabled($selfRestricted ?? false)>
 
                                             <option selected disabled>Select Department</option>
 
@@ -298,9 +316,9 @@
 
                                     <div class="form-group" id="office_id">
 
-                                        <label> Assign Office <sup>*</sup></label>
+                                        <label> Assign Office <sup>*</sup> @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif</label>
 
-                                        <select class="ps-select  {{ $errors->has('office_id') ? ' is-invalid' : '' }}" id="input-office_id"  title="office Name" name="office_id" required="" aria-required="true">
+                                        <select class="ps-select  {{ $errors->has('office_id') ? ' is-invalid' : '' }}" id="input-office_id"  title="office Name" name="office_id" required="" aria-required="true" @disabled($selfRestricted ?? false)>
 
                                             <option selected disabled>Select Office</option>
 
@@ -366,11 +384,11 @@
 
                                 <div class="form-group">
 
-                                    <label>CNIC Front Image</label>
+                                    <label>CNIC Front Image @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif</label>
 
                                     <div class="form-group--nest">
 
-                                        <input class="form-control mb-1" name="cnicf" type="file">
+                                        <input class="form-control mb-1" name="cnicf" type="file" @disabled($selfRestricted ?? false)>
 
                                         <button class="ps-btn ps-btn--sm">Choose</button>
 
@@ -388,11 +406,11 @@
 
                                 <div class="form-group">
 
-                                    <label>CNIC Back Image</label>
+                                    <label>CNIC Back Image @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif</label>
 
                                     <div class="form-group--nest">
 
-                                        <input class="form-control mb-1" name="cnicb" type="file">
+                                        <input class="form-control mb-1" name="cnicb" type="file" @disabled($selfRestricted ?? false)>
 
                                         <button class="ps-btn ps-btn--sm">Choose</button>
 
@@ -411,16 +429,16 @@
                                 @if(Auth::user()->can('staff.data.all'))
 
                                     <div class="form-group">
-                                        <label>Status</label>
+                                        <label>Status @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif</label>
                                         <div class="switch switch-lg switch-success">
-                                            Enable: <input <?php if($user->status == 1){ echo 'checked'; } ?> type="radio" name="status"  value="1" style="height: auto !important;"/>
-                                            Disable: <input <?php if($user->status == 0){ echo 'checked'; } ?> type="radio" name="status" value="0" style="height: auto !important;"/>
+                                            Enable: <input <?php if($user->status == 1){ echo 'checked'; } ?> type="radio" name="status"  value="1" style="height: auto !important;" @disabled($selfRestricted ?? false)/>
+                                            Disable: <input <?php if($user->status == 0){ echo 'checked'; } ?> type="radio" name="status" value="0" style="height: auto !important;" @disabled($selfRestricted ?? false)/>
                                         </div>
                                     </div>
 
                                     <div class="form-group">
-                                        <label> Assign Role(s) <sup>*</sup></label>
-                                        <select class="ps-select multiple-select w-100 {{ $errors->has('assign_role') ? ' is-invalid' : '' }}" id="input-assign_role"  title="Role Name" name="assign_role[]" multiple="multiple" required aria-required="true">
+                                        <label> Assign Role(s) <sup>*</sup> @if($selfRestricted ?? false)<span class="field-locked-badge">🔒 Locked</span>@endif</label>
+                                        <select class="ps-select multiple-select w-100 {{ $errors->has('assign_role') ? ' is-invalid' : '' }}" id="input-assign_role"  title="Role Name" name="assign_role[]" multiple="multiple" required aria-required="true" @disabled($selfRestricted ?? false)>
                                             @if(!empty($roles))
                                                 @foreach($roles as $role)
                                                     <option value="{{ $role->id }}" @if(in_array($role->id, (array) old('assign_role', $user->roles->pluck('id')->all()))) selected @endif>{{ $role->name }}</option>

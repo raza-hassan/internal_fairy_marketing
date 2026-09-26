@@ -166,6 +166,126 @@ class Helper
         return  $data;
     }
 
+    /**
+     * Limits an allocation user list to one office - except for top-level
+     * managers (CEO/COO), who must be able to allocate to users of every office.
+     */
+    public static function scopeToOffice($users, $officeId)
+    {
+        if (Auth::check() && Auth::user()->isTopLevelManager()) {
+            return $users;
+        }
+
+        return $users->where('office_id', $officeId);
+    }
+
+    /**
+     * Groups users under their top-most Head of Sales (walking up the `parent`
+     * chain) and orders each group as a reporting tree, for rendering allocation
+     * dropdowns as <optgroup>s with every user's team indented beneath them.
+     * Users with no HOD above them land in a trailing "Management / Others" group.
+     *
+     * @return array<int, array{label: string, items: array<int, array{user: User, depth: int, details: string}>}>
+     */
+    public static function groupUsersByHod($users)
+    {
+        static $parents = null, $hodIds = null, $names = null, $offices = null, $details = null;
+
+        if ($parents === null) {
+            $all = User::get(['id', 'name', 'parent', 'role', 'office_id', 'designation_name']);
+            $hodRole = \App\Models\Designations::where('name', 'Head of Sales')->value('id') ?? 5;
+            $parents = $all->pluck('parent', 'id')->all();
+            $names = $all->pluck('name', 'id')->all();
+            $hodIds = $all->where('role', $hodRole)->pluck('office_id', 'id')->all();
+            $offices = \App\Models\Offices::pluck('name', 'id')->all();
+            $designationNames = \App\Models\Designations::pluck('name', 'id')->all();
+            // "(Role, Office)" shown after each user's name
+            $details = $all->mapWithKeys(function ($u) use ($designationNames, $offices) {
+                $parts = array_filter([
+                    $u->designation_name ?: ($designationNames[$u->role] ?? null),
+                ]);
+                return [$u->id => $parts ? ' (' . implode(', ', $parts) . ')' : ''];
+            })->all();
+        }
+
+        $users = collect($users)->values();
+        $visible = $users->keyBy('id');
+
+        // Ancestor chain (nearest first) of a user, guarded against cyclic parents
+        $ancestors = function ($id) use ($parents) {
+            $chain = [];
+            $current = $parents[$id] ?? null;
+            while ($current && !in_array($current, $chain) && count($chain) < 25) {
+                $chain[] = $current;
+                $current = $parents[$current] ?? null;
+            }
+            return $chain;
+        };
+
+        $groupOf = [];
+        $treeParent = [];
+        foreach ($users as $user) {
+            $chain = $ancestors($user->id);
+            $groupKey = 0; // 0 = Management / Others
+            foreach (array_merge([$user->id], $chain) as $id) {
+                if (isset($hodIds[$id])) {
+                    $groupKey = $id; // keeps climbing, so ends on the top-most HOD
+                }
+            }
+            $groupOf[$user->id] = $groupKey;
+            $treeParent[$user->id] = $chain;
+        }
+
+        // Tree parent = nearest ancestor that is in the list and in the same group
+        $children = [];
+        $roots = [];
+        foreach ($users as $user) {
+            $parentId = null;
+            foreach ($treeParent[$user->id] as $id) {
+                if ($visible->has($id) && $groupOf[$id] === $groupOf[$user->id]) {
+                    $parentId = $id;
+                    break;
+                }
+            }
+            if ($parentId === null) {
+                $roots[$groupOf[$user->id]][] = $user;
+            } else {
+                $children[$parentId][] = $user;
+            }
+        }
+
+        $walk = function ($nodes, $depth, &$items) use (&$walk, $children, $details) {
+            foreach ($nodes as $node) {
+                $items[] = ['user' => $node, 'depth' => $depth, 'details' => $details[$node->id] ?? ''];
+                $walk($children[$node->id] ?? [], $depth + 1, $items);
+            }
+        };
+
+        $groups = [];
+        foreach ($roots as $groupKey => $groupRoots) {
+            if ($groupKey === 0) {
+                continue;
+            }
+            // HOD first, then anyone whose in-list manager is hidden
+            usort($groupRoots, fn ($a, $b) => ($b->id == $groupKey) <=> ($a->id == $groupKey));
+            $items = [];
+            $walk($groupRoots, 0, $items);
+            $office = $offices[$hodIds[$groupKey]] ?? null;
+            $groups[] = [
+                'label' => 'HOD ' . $names[$groupKey] . ($office ? " ({$office})" : ''),
+                'items' => $items,
+            ];
+        }
+
+        if (!empty($roots[0])) {
+            $items = [];
+            $walk($roots[0], 0, $items);
+            $groups[] = ['label' => 'Management / Others', 'items' => $items];
+        }
+
+        return $groups;
+    }
+
     public static function usersInactive($data)
     {
         // echo"<pre>"; print_r($data); exit;

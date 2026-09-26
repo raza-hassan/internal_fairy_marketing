@@ -126,6 +126,34 @@ class User extends Authenticatable //implements MustVerifyEmail {
     {
         return $this->can("{$module}.data.all");
     }
+
+    /**
+     * Fields a non-top-level user may change on their own account.
+     * Everything else on their own record is locked (view/edit others is unaffected).
+     */
+    public const SELF_EDIT_FIELDS = ['telephone1', 'telephone2', 'address'];
+
+    public function isTopLevelManager(): bool
+    {
+        return $this->hasAnyRole(['CEO', 'COO']);
+    }
+
+    /**
+     * True if $this may fully edit $target's record (any field). CEO/COO can edit
+     * anyone; everyone else can fully edit users in their reporting hierarchy
+     * (subordinateIds()) but not themselves - self-edit is handled separately
+     * as the restricted SELF_EDIT_FIELDS case.
+     */
+    public function canManageUser(User $target): bool
+    {
+        if ($this->isTopLevelManager()) {
+            return true;
+        }
+        if ($this->id == $target->id) {
+            return false;
+        }
+        return in_array($target->id, $this->subordinateIds(), true);
+    }
     /**
      * Send the password reset notification.
      *

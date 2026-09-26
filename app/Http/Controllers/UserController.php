@@ -258,87 +258,106 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        // echo "<pre>";print_r($user); exit;
+        $auth_user = Auth::user();
+        $canManageFully = $auth_user->canManageUser($user);
+        $isSelf = $auth_user->id == $user->id;
 
-        if (Auth::user()->can('staff.edit')) {
-            $auth_user = Auth::user();
-            if ($auth_user->designation->sequence_menu > $user->designation->sequence_menu) {
-                return back()->withErrors(__('User doesn\'t have permission to access this resource'));
-            }
-
-            // $managers = User::where('role', '!=', 0)->where('role', '!=', 6)->where('role', '!=', 7)->where('role', '!=', 8)->get();
-
-            // ======= Users With Helper=======
-            $data = array(
-                'id' => Auth::user()->id,
-                'role' =>  Auth::user()->role,
-            );
-            $response = Helper::users($data);
-            $managers = $response['users']->filter(function ($user) {
-                return ($user['role'] == 5 || $user['role'] == 1);
-            });
-            // ======= Users With Helper=======
-
-            $departments = Departments::all();
-            $designations = Designations::orderBy('sequence_menu', 'asc')->get();
-            $offices = Offices::all();
-            $roles = Role::all();
-            return view('users.edit', compact('user', 'managers', 'designations', 'departments', 'offices', 'roles'));
-        } else {
+        if (!$canManageFully && !$isSelf) {
+            return back()->withErrors(__('User doesn\'t have permission to access this resource'));
+        }
+        if (!$isSelf && !$auth_user->can('staff.edit')) {
             return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }
+
+        $selfRestricted = $isSelf && !$canManageFully;
+
+        // ======= Users With Helper=======
+        $data = array(
+            'id' => Auth::user()->id,
+            'role' =>  Auth::user()->role,
+        );
+        $response = Helper::users($data);
+        $managers = $response['users']->filter(function ($user) {
+            return ($user['role'] == 5 || $user['role'] == 1);
+        });
+        // ======= Users With Helper=======
+
+        $departments = Departments::all();
+        $designations = Designations::orderBy('sequence_menu', 'asc')->get();
+        $offices = Offices::all();
+        $roles = Role::all();
+        return view('users.edit', compact('user', 'managers', 'designations', 'departments', 'offices', 'roles', 'selfRestricted'));
     }
 
     public function update(Request $request, User $user)
     {
-        // echo "<pre>";print_r($request->all());exit;
-        if (Auth::user()->can('staff.edit')) {
-            $validated = $request->validate([
-                'cnic' => 'required',
-                'name' => 'required',
-                'email' => 'required',
-                'telephone1' => 'required',
-            ]);
-            if ($request->file('file')) {
-                $fileName = time() . '_' . $request->file->getClientOriginalName();
-                $filePath = $request->file('file')->storeAs('users', $fileName, 'public');
-            } else {
-                $filePath = $request->input('oldfile');
+        $auth_user = Auth::user();
+        $isSelf = $auth_user->id === $user->id;
+        $canManageFully = $auth_user->canManageUser($user);
+
+        if ($canManageFully) {
+            if (!$auth_user->can('staff.edit')) {
+                return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
             }
-            //echo $filePath; exit;
-            if ($request->file('cnicf')) {
-                $fileName = time() . '_' . $request->file('cnicf')->getClientOriginalName();
-                $cnicf = $request->file('cnicf')->storeAs('users', $fileName, 'public');
-            } else {
-                $cnicf = $request->input('oldcnicf');
-            }
-            //echo $cnicf; exit;
-            if ($request->file('cnicb')) {
-                //echo 'dfsdf'; exit;
-                $fileName = time() . '_' . $request->file('cnicb')->getClientOriginalName();
-                $cnicb = $request->file('cnicb')->storeAs('users', $fileName, 'public');
-            } else {
-                $cnicb = $request->input('oldcnicb');
-            }
-            //        echo $cnicb; exit;
-            $parent = 0;
-            if ($request->get('parent') > 0 && $request->get('parent') != 'Select Manager') {
-                $parent = $request->get('parent');
-            }
-            $user->update($request->all());
-            $user->cnicf = $cnicf;
-            $user->cnicb = $cnicb;
+        } elseif (!$isSelf) {
+            return back()->withErrors(__('User doesn\'t have permission to access this resource'));
+        }
+
+        $selfRestricted = $isSelf && !$canManageFully;
+
+        if ($request->file('file')) {
+            $fileName = time() . '_' . $request->file->getClientOriginalName();
+            $filePath = $request->file('file')->storeAs('users', $fileName, 'public');
+        } else {
+            $filePath = $selfRestricted ? $user->profile : $request->input('oldfile');
+        }
+
+        if ($selfRestricted) {
+            $request->validate(['telephone1' => 'required']);
+            $user->update($request->only(User::SELF_EDIT_FIELDS));
             $user->profile = $filePath;
             $user->save();
 
-            if ($request->assign_role) {
-                $user->syncRoles(array_map('intval', $request->assign_role));
-            }
-
             return back()->withStatus(__('User successfully updated.'));
-        } else {
-            return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
         }
+
+        $validated = $request->validate([
+            'cnic' => 'required',
+            'name' => 'required',
+            'email' => 'required',
+            'telephone1' => 'required',
+        ]);
+        //echo $filePath; exit;
+        if ($request->file('cnicf')) {
+            $fileName = time() . '_' . $request->file('cnicf')->getClientOriginalName();
+            $cnicf = $request->file('cnicf')->storeAs('users', $fileName, 'public');
+        } else {
+            $cnicf = $request->input('oldcnicf');
+        }
+        //echo $cnicf; exit;
+        if ($request->file('cnicb')) {
+            //echo 'dfsdf'; exit;
+            $fileName = time() . '_' . $request->file('cnicb')->getClientOriginalName();
+            $cnicb = $request->file('cnicb')->storeAs('users', $fileName, 'public');
+        } else {
+            $cnicb = $request->input('oldcnicb');
+        }
+        //        echo $cnicb; exit;
+        $parent = 0;
+        if ($request->get('parent') > 0 && $request->get('parent') != 'Select Manager') {
+            $parent = $request->get('parent');
+        }
+        $user->update($request->all());
+        $user->cnicf = $cnicf;
+        $user->cnicb = $cnicb;
+        $user->profile = $filePath;
+        $user->save();
+
+        if ($request->assign_role) {
+            $user->syncRoles(array_map('intval', $request->assign_role));
+        }
+
+        return back()->withStatus(__('User successfully updated.'));
     }
 
     public function search(Request $request)
@@ -550,6 +569,11 @@ class UserController extends Controller
 
     public function password(Request $request, User $user)
     {
+        $auth_user = Auth::user();
+        if ($auth_user->id !== $user->id && !$auth_user->canManageUser($user)) {
+            return redirect('/')->withErrors(__('Doesn\'t have permission to access this resource'));
+        }
+
         $validated = $request->validate([
             'password' => ['required', 'confirmed'],
         ]);

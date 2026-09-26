@@ -30,7 +30,7 @@ class ClientsController extends Controller {
                     'role' => Auth::user()->role,
                 );
                 $responce = Helper::users($data);
-                $users = $responce['users']->where('office_id', 1);
+                $users = Helper::scopeToOffice($responce['users'], 1);
             // =========== Users With Helper=========
             $clients = Clients::where('user_id', Auth::user()->id)->where('is_delete', 0)->orderBy('id', 'desc')->paginate(30);
             $offices = Offices::orderBy('id', 'asc')->get();
@@ -51,7 +51,7 @@ class ClientsController extends Controller {
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', 1);
+            $users = Helper::scopeToOffice($responce['users'], 1);
         // ======== Users With Helper======
 
         // $users = array();

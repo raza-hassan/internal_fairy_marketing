@@ -94,9 +94,7 @@
                         <div class="bootstrap-select fm-cmp-mg">
                             <select class="form-control" name="user_id" required="">
                                 <option value="" selected disabled>Select User</option>
-                                @foreach($users as $user)
-                                <option value="{{$user->id}}">{{$user->name}}</option>
-                                @endforeach
+                                @include('partials.allocation-options', ['users' => $users])
                             </select>
                         </div>
                     </div>
