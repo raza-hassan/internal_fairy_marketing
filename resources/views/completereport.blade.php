@@ -35,9 +35,7 @@
                                 <div class="bootstrap-select fm-cmp-mg">
                                     <select class="form-control" name="user_id">
                                         <option value="0">All</option>
-                                        @foreach($users as $user)
-                                        <option <?php if(app('request')->input('user_id') == $user->id || Auth::user()->id == $user->id){ echo 'selected'; } ?> value="{{$user->id}}">{{$user->name}}</option>
-                                        @endforeach
+                                        @include('partials.allocation-options', ['users' => $users, 'selected' => app('request')->input('user_id') ?: Auth::user()->id])
                                     </select>
                                 </div>
                             </div>

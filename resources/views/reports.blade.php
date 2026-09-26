@@ -209,15 +209,7 @@
 
 
                                         <option value="0">All</option>
-
-
-                                        @foreach($users as $user)
-
-
-                                        <option value="{{$user->id}}">{{$user->name}}</option>
-
-
-                                        @endforeach
+                                        @include('partials.allocation-options', ['users' => $users])
 
 
                                     </select>

@@ -82,7 +82,7 @@ class TaskController extends Controller
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', 1);
+            $users = Helper::scopeToOffice($responce['users'], 1);
         // ===== Users With Helper=====
 
         $todo = '';
@@ -194,7 +194,7 @@ class TaskController extends Controller
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', 1);
+            $users = Helper::scopeToOffice($responce['users'], 1);
         // ===== Users With Helper=====
 
         $offices = Offices::orderBy('id', 'ASC')->get();

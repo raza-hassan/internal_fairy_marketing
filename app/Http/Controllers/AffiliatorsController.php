@@ -44,7 +44,7 @@ class AffiliatorsController extends Controller {
                     'role' => Auth::user()->role,
                 );
                 $responce = Helper::users($data);
-                $users = $responce['users']->where('office_id' , 1);
+                $users = Helper::scopeToOffice($responce['users'], 1);
             // ====== Users With Helper======
 
             $locations = Location::whereHas('affiliators')->get();
@@ -84,7 +84,7 @@ class AffiliatorsController extends Controller {
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', 1);
+            $users = Helper::scopeToOffice($responce['users'], 1);
         // ====== Users With Helper======
 
         $locations = Location::whereHas('affiliators')->get();
@@ -104,7 +104,7 @@ class AffiliatorsController extends Controller {
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', 1);
+            $users = Helper::scopeToOffice($responce['users'], 1);
         // ====== Users With Helper======
 
         $locations = Location::whereHas('affiliators')->get();
@@ -925,7 +925,7 @@ class AffiliatorsController extends Controller {
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', 1);
+            $users = Helper::scopeToOffice($responce['users'], 1);
         // ====== Users With Helper======
 
         $todo = '';
@@ -1191,7 +1191,7 @@ class AffiliatorsController extends Controller {
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', 1);
+            $users = Helper::scopeToOffice($responce['users'], 1);
         // ====== Users With Helper======
 
         if (Auth::user()->can('affiliator.data.all'))
@@ -1744,7 +1744,7 @@ class AffiliatorsController extends Controller {
                     'role' => Auth::user()->role,
                 );
                 $responce = Helper::users($data);
-                $users = $responce['users']->where('office_id', 1);
+                $users = Helper::scopeToOffice($responce['users'], 1);
             // ====== Users With Helper======
 
             $locations = Location::whereHas('affiliators')->get();

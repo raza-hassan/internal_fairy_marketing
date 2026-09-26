@@ -111,7 +111,7 @@ class ReportController extends Controller
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', 1);
+            $users = Helper::scopeToOffice($responce['users'], 1);
         // ===== Users With Helper=====
 
         return view('affiliators.afftodos', compact('tasks', 'users'));
@@ -131,7 +131,7 @@ class ReportController extends Controller
                     'role' => Auth::user()->role,
                 );
                 $responce = Helper::users($data);
-                $users = $responce['users']->where('office_id', 1)->pluck('id');
+                $users = Helper::scopeToOffice($responce['users'], 1)->pluck('id');
             // ===== Users With Helper=====
         }
 
@@ -153,7 +153,7 @@ class ReportController extends Controller
                     'role' => Auth::user()->role,
                 );
                 $responce = Helper::users($data);
-                $ids = $responce['users']->where('office_id', 1)->pluck('id');
+                $ids = Helper::scopeToOffice($responce['users'], 1)->pluck('id');
              // ===== Users With Helper=====
         }
         else {
@@ -267,7 +267,7 @@ class ReportController extends Controller
                 'role' => Auth::user()->role,
             );
             $responce = Helper::users($data);
-            $users = $responce['users']->where('office_id', 1);
+            $users = Helper::scopeToOffice($responce['users'], 1);
         // ===== Users With Helper=====
 
 
