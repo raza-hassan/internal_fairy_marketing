@@ -13,17 +13,24 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = User::find(Auth::user()->id);
-        return view('profile.edit', compact('user'));
+        $selfRestricted = !$user->isTopLevelManager();
+        return view('profile.edit', compact('user', 'selfRestricted'));
     }
     public function adminprofile()
     {
         $user = User::find(Auth::user()->id);
-        return view('profile.admin-edit', compact('user'));
+        $selfRestricted = !$user->isTopLevelManager();
+        return view('profile.admin-edit', compact('user', 'selfRestricted'));
     }
 
     public function update(Request $request)
     {
-        auth()->user()->update($request->all());
+        $user = auth()->user();
+        if ($user->isTopLevelManager()) {
+            $user->update($request->all());
+        } else {
+            $user->update($request->only(User::SELF_EDIT_FIELDS));
+        }
         return back()->withStatus(__('Profile successfully updated.'));
     }
 
